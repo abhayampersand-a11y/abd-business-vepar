@@ -14,9 +14,6 @@ export default function Page() {
         { title: "One-tap enquiries", body: "Send a purchase enquiry without re-keying your details." },
         { title: "Get discovered", body: "Your catalogue becomes searchable to buyers near you." },
       ]}
-      premium
-      primaryAction={{ label: "See Plans", href: "/plans" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
     />
   );
 }

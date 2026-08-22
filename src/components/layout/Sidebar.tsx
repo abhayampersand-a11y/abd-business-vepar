@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import clsx from 'clsx';
-import { ChevronDown, ChevronRight, Plus, Search, Crown, Building2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Search, Building2 } from 'lucide-react';
 import { NAV, type NavItem } from './nav';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleSidebar } from '@/store/uiSlice';
@@ -157,9 +157,6 @@ export function Sidebar() {
                           <span className="absolute left-0 top-0 h-full w-[3px] bg-brand" />
                         )}
                         <span className="flex-1 truncate">{child.label}</span>
-                        {child.premium && (
-                          <Crown size={13} className="shrink-0 text-[#4aa3ff]" />
-                        )}
                         {child.quickAdd && (
                           <span
                             role="button"
@@ -184,25 +181,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Promo card */}
-      {!collapsed && (
-        <div className="mx-3 mb-2 rounded-lg bg-gold-soft p-3">
-          <p className="text-[15px] font-bold text-ink">417 users</p>
-          <p className="mt-0.5 text-[11.5px] leading-tight text-ink-soft">
-            got Vyapar Premium in last 24hrs!
-          </p>
-          <Link
-            href="/plans"
-            className="mt-2.5 flex items-center justify-between rounded-md bg-[#2b2b2b] px-2.5 py-2 text-[12.5px] font-medium text-white transition hover:bg-black"
-          >
-            <span className="flex items-center gap-1.5">
-              <Crown size={14} className="text-gold" />
-              Get Vyapar Premium
-            </span>
-            <ChevronRight size={14} />
-          </Link>
-        </div>
-      )}
 
       {/* Firm switcher */}
       <Link

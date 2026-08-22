@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Automatic payment reminders", body: "Nudge overdue parties on a schedule you decide." },
         { title: "Delivery reports", body: "See which messages landed and which bounced." },
       ]}
-      premium
       primaryAction={{ label: "Back to Parties", href: "/parties" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
       note={"The WhatsApp icon on each party already opens a chat with that contact."}
     />
   );

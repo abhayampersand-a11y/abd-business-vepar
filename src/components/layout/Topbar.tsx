@@ -91,7 +91,6 @@ export function Topbar() {
             { label: 'Business Profile', onClick: () => router.push('/settings/profile') },
             { label: 'Verify My Data', onClick: () => router.push('/utilities/verify') },
             { label: 'Backup & Restore', onClick: () => router.push('/sync/backup') },
-            { label: 'Plans & Pricing', onClick: () => router.push('/plans') },
           ]}
         />
 

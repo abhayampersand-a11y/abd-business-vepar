@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import clsx from 'clsx';
-import { Crown } from 'lucide-react';
 import { REPORT_GROUPS } from './reports-nav';
 import { Spinner } from '@/components/ui';
 
@@ -50,7 +49,6 @@ function ReportsNav() {
                 )}
               >
                 <span className="flex-1 truncate">{link.label}</span>
-                {link.premium && <Crown size={12} className="shrink-0 text-accent" />}
               </Link>
             );
           })}

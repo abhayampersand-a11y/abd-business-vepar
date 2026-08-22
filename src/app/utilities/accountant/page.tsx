@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Direct report access", body: "GSTR-1, GSTR-2 and P&L, always current." },
         { title: "Revoke any time", body: "Access ends the moment you remove them." },
       ]}
-      premium
       primaryAction={{ label: "Export Data", href: "/utilities/export-items" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
       note={"For now, export the reports your accountant needs and share the file."}
     />
   );

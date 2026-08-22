@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
-import { Crown, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Button, Card } from '@/components/ui';
 
 export type Feature = { title: string; body: string };
 
 /**
  * Shell for the screens that describe a capability rather than list data —
- * WhatsApp Connect, Tally sync, the premium add-ons and so on.
+ * WhatsApp Connect, Tally sync, and the other capability screens.
  */
 export function FeaturePage({
   icon: Icon,
@@ -18,7 +18,6 @@ export function FeaturePage({
   features,
   primaryAction,
   secondaryAction,
-  premium,
   note,
 }: {
   icon: LucideIcon;
@@ -27,21 +26,12 @@ export function FeaturePage({
   features: Feature[];
   primaryAction?: { label: string; href: string };
   secondaryAction?: { label: string; href: string };
-  premium?: boolean;
   note?: string;
 }) {
   return (
     <div className="flex min-h-full flex-col items-center gap-6 px-6 py-12 text-center">
       <div className="max-w-2xl">
-        <div className="flex items-center justify-center gap-2">
-          <h1 className="text-2xl font-semibold text-ink">{title}</h1>
-          {premium && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-gold-soft px-2.5 py-1 text-[11.5px] font-medium text-gold">
-              <Crown size={12} />
-              Premium
-            </span>
-          )}
-        </div>
+        <h1 className="text-2xl font-semibold text-ink">{title}</h1>
         <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">{subtitle}</p>
       </div>
 

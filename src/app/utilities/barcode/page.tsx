@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Custom layouts", body: "Choose what appears on the label — price, MRP, item code." },
         { title: "Scanner ready", body: "Codes work with any standard USB or Bluetooth scanner." },
       ]}
-      premium
       primaryAction={{ label: "Back to Items", href: "/items" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
     />
   );
 }

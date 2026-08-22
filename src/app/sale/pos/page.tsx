@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Thermal printing", body: "Prints to 2-inch and 3-inch receipt printers." },
         { title: "Offline safe", body: "Keeps billing when the connection drops, syncs when it returns." },
       ]}
-      premium
       primaryAction={{ label: "Create an invoice instead", href: "/txn/new/sale" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
     />
   );
 }

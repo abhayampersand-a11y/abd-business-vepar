@@ -12,14 +12,11 @@ import {
   RefreshCw,
   Wrench,
   Settings,
-  BadgeIndianRupee,
 } from 'lucide-react';
 
 export type NavChild = {
   label: string;
   href: string;
-  /** Renders the little crown badge Vyapar puts on premium features. */
-  premium?: boolean;
   /** Shows the "+" quick-add affordance on the row. */
   quickAdd?: string;
 };
@@ -39,8 +36,8 @@ export const NAV: NavItem[] = [
     icon: Users,
     children: [
       { label: 'Party Details', href: '/parties', quickAdd: '/parties?new=1' },
-      { label: 'Whatsapp Connect', href: '/parties/whatsapp', premium: true },
-      { label: 'Vyapar Network', href: '/parties/network', premium: true },
+      { label: 'Whatsapp Connect', href: '/parties/whatsapp' },
+      { label: 'Vyapar Network', href: '/parties/network' },
     ],
   },
   { label: 'Items', href: '/items', icon: ShoppingBag, quickAdd: '/items?new=1' },
@@ -63,7 +60,7 @@ export const NAV: NavItem[] = [
         href: '/sale/credit-notes',
         quickAdd: '/txn/new/credit_note',
       },
-      { label: 'Vyapar POS', href: '/sale/pos', premium: true },
+      { label: 'Vyapar POS', href: '/sale/pos' },
     ],
   },
   {
@@ -117,17 +114,16 @@ export const NAV: NavItem[] = [
       { label: 'Import Items', href: '/utilities/import-items' },
       { label: 'Set Up My Business', href: '/utilities/setup' },
       { label: 'Accountant Access', href: '/utilities/accountant' },
-      { label: 'Barcode Generator', href: '/utilities/barcode', premium: true },
-      { label: 'Update Items In Bulk', href: '/utilities/bulk-update', premium: true },
-      { label: 'Import From Tally', href: '/utilities/import-tally', premium: true },
+      { label: 'Barcode Generator', href: '/utilities/barcode' },
+      { label: 'Update Items In Bulk', href: '/utilities/bulk-update' },
+      { label: 'Import From Tally', href: '/utilities/import-tally' },
       { label: 'Import Parties', href: '/utilities/import-parties' },
-      { label: 'Track Your Salesmen', href: '/utilities/salesmen', premium: true },
-      { label: 'Exports To Tally', href: '/utilities/export-tally', premium: true },
+      { label: 'Track Your Salesmen', href: '/utilities/salesmen' },
+      { label: 'Exports To Tally', href: '/utilities/export-tally' },
       { label: 'Export Items', href: '/utilities/export-items' },
       { label: 'Verify My Data', href: '/utilities/verify' },
       { label: 'Close Financial Year', href: '/utilities/close-year' },
     ],
   },
   { label: 'Settings', href: '/settings', icon: Settings },
-  { label: 'Plans & Pricing', href: '/plans', icon: BadgeIndianRupee },
 ];

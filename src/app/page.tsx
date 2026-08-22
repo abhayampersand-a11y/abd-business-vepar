@@ -32,23 +32,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-full">
-      {/* Plan banner, exactly where Vyapar puts it */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-danger/20 bg-danger-soft px-5 py-3">
-        <AlertTriangle size={18} className="text-danger" />
-        <p className="flex-1 text-[13.5px] text-ink">
-          <span className="font-semibold">Your Free Plan has expired.</span> To continue using
-          Vyapar, upgrade to our Premium Plan.
-        </p>
-        <Link href="/plans">
-          <Button size="sm">Buy Now</Button>
-        </Link>
-        <Link href="/plans">
-          <Button size="sm" variant="outline" className="border-brand text-brand hover:bg-brand-soft">
-            Get Free Demo
-          </Button>
-        </Link>
-      </div>
-
       {isLoading ? (
         <Spinner label="Loading your dashboard…" />
       ) : (
@@ -194,22 +177,6 @@ export default function HomePage() {
                 <Button variant="secondary" size="sm" className="mt-3 w-full">
                   Connect
                 </Button>
-              </Link>
-            </Card>
-
-            <Card>
-              <div className="flex items-start justify-between">
-                <h3 className="text-[14px] font-semibold text-ink">Google Profile Manager</h3>
-                <Badge tone="danger">TRIAL EXPIRED</Badge>
-              </div>
-              <p className="mt-2.5 text-[12.5px] leading-snug text-ink-soft">
-                76% of local searches result in a visit within 24 hours.
-              </p>
-              <Link
-                href="/plans"
-                className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-accent"
-              >
-                Buy Now <ChevronRight size={14} />
               </Link>
             </Card>
 

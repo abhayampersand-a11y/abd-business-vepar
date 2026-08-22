@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Tax rate changes", body: "Move a whole group of items to a new GST slab." },
         { title: "Stock corrections", body: "Reconcile counted stock against the system in bulk." },
       ]}
-      premium
       primaryAction={{ label: "Import Items", href: "/utilities/import-items" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
       note={"Items can be edited one at a time today, and created in bulk from a spreadsheet."}
     />
   );

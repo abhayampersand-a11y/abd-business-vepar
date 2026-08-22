@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Sales by person", body: "Compare performance across the team in one report." },
         { title: "Field visibility", body: "See the orders raised on the road as they happen." },
       ]}
-      premium
       primaryAction={{ label: "See all transactions", href: "/reports/all-transactions" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
     />
   );
 }

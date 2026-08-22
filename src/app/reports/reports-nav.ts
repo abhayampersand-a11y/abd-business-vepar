@@ -5,7 +5,6 @@ export type ReportLink = {
   slug: string;
   /** Extra query string appended when navigating. */
   query?: string;
-  premium?: boolean;
   /** Not yet backed by data — the screen explains what is missing. */
   planned?: boolean;
 };
@@ -24,10 +23,10 @@ export const REPORT_GROUPS: ReportGroup[] = [
       { label: 'Day book', slug: 'day-book' },
       { label: 'All Transactions', slug: 'all-transactions' },
       { label: 'Profit And Loss', slug: 'profit-and-loss' },
-      { label: 'Bill Wise Profit', slug: 'bill-wise-profit', premium: true },
+      { label: 'Bill Wise Profit', slug: 'bill-wise-profit' },
       { label: 'Sale Aging', slug: 'sale-aging' },
       { label: 'Cash flow', slug: 'cash-flow' },
-      { label: 'Balance Sheet', slug: 'balance-sheet', premium: true },
+      { label: 'Balance Sheet', slug: 'balance-sheet' },
     ],
   },
   {

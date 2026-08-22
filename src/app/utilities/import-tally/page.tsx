@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Voucher history", body: "Sales, purchases and payments come across with dates intact." },
         { title: "Mapping preview", body: "Check how each Tally field lands before you commit." },
       ]}
-      premium
       primaryAction={{ label: "Import from CSV", href: "/utilities/import-items" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
       note={"A CSV export from Tally can be imported today through Import Items and Import Parties."}
     />
   );

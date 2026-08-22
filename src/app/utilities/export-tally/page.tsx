@@ -14,9 +14,7 @@ export default function Page() {
         { title: "Period selection", body: "Export just the month or quarter your accountant asked for." },
         { title: "Reconciliation summary", body: "A cover sheet showing totals so nothing goes missing." },
       ]}
-      premium
       primaryAction={{ label: "Export as CSV", href: "/utilities/export-items" }}
-      secondaryAction={{ label: 'See Plans', href: '/plans' }}
       note={"CSV exports of items, parties and transactions are available now."}
     />
   );
