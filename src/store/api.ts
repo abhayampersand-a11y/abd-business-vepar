@@ -22,9 +22,11 @@ import type {
   StockAdjustment,
   Firm,
   LoanRow,
+  MePayload,
 } from '@/types';
 
 const TAGS = [
+  'Auth',
   'Bootstrap',
   'Party',
   'Item',
@@ -70,6 +72,12 @@ export const api = createApi({
   keepUnusedDataFor: 300,
   refetchOnReconnect: true,
   endpoints: (build) => ({
+    /* ---------------- auth ---------------- */
+    getMe: build.query<MePayload, void>({
+      query: () => '/auth/me',
+      providesTags: ['Auth'],
+    }),
+
     /* ---------------- bootstrap & firm ---------------- */
     getBootstrap: build.query<BootstrapPayload, void>({
       query: () => '/bootstrap',
@@ -385,6 +393,7 @@ export const api = createApi({
 });
 
 export const {
+  useGetMeQuery,
   useGetBootstrapQuery,
   useGetFirmQuery,
   useUpdateFirmMutation,

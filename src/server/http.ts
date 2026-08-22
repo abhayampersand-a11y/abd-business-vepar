@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { NotFoundError } from './txn-service';
+import { requireUser, UnauthorizedError } from './auth';
 
 export const ok = <T>(data: T, init?: ResponseInit) => NextResponse.json(data, init);
 
@@ -10,17 +11,29 @@ export function fail(message: string, status = 400, extra?: Record<string, unkno
   return NextResponse.json({ error: message, ...extra }, { status });
 }
 
+type HandlerOptions = {
+  /**
+   * Skip the sign-in check. Only the auth endpoints themselves should set this
+   * — everything else is protected by default, so a new route is never
+   * accidentally left open.
+   */
+  public?: boolean;
+};
+
 /**
  * Wraps a route handler so every failure comes back as JSON the client can
  * render, instead of an opaque 500 HTML page.
  */
 export function handler<Args extends unknown[]>(
   fn: (...args: Args) => Promise<Response>,
+  options: HandlerOptions = {},
 ): (...args: Args) => Promise<Response> {
   return async (...args: Args) => {
     try {
+      if (!options.public) await requireUser();
       return await fn(...args);
     } catch (err) {
+      if (err instanceof UnauthorizedError) return fail(err.message, 401);
       if (err instanceof ZodError) {
         const first = err.issues[0];
         return fail(first ? `${first.path.join('.')}: ${first.message}` : 'Invalid input', 422, {

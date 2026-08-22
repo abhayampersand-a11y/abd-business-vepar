@@ -16,12 +16,27 @@ const BASE = 'http://localhost:3000/api';
 let pass = 0;
 let fail = 0;
 
+/** Session cookie captured at sign-in; every later call carries it. */
+let cookie = '';
+
+/** Picks the session cookie out of a response, if it set one. */
+function captureCookie(res) {
+  for (const c of res.headers.getSetCookie?.() ?? []) {
+    if (c.startsWith('vyapar_session=')) cookie = c.split(';')[0];
+  }
+}
+
 async function call(method, path, body) {
+  const headers = {};
+  if (body) headers['content-type'] = 'application/json';
+  if (cookie) headers.cookie = cookie;
+
   const res = await fetch(BASE + path, {
     method,
-    headers: body ? { 'content-type': 'application/json' } : undefined,
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+  captureCookie(res);
   const text = await res.text();
   let json;
   try {
@@ -31,6 +46,30 @@ async function call(method, path, body) {
   }
   if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}: ${JSON.stringify(json).slice(0, 300)}`);
   return json;
+}
+
+/**
+ * The API is behind a session now, so the test signs in before doing anything.
+ * Re-running is fine: registration 409s once the account exists, and we fall
+ * back to logging in.
+ */
+async function signIn() {
+  const credentials = { email: 'smoke@example.test', password: 'smoke-test-password' };
+
+  const res = await fetch(BASE + '/auth/register', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'Smoke Test', ...credentials }),
+  });
+  captureCookie(res);
+
+  if (res.status === 409) {
+    await call('POST', '/auth/login', credentials);
+  } else if (!res.ok) {
+    throw new Error(`sign-in failed -> ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+
+  if (!cookie) throw new Error('sign-in did not return a session cookie');
 }
 
 function check(label, actual, expected) {
@@ -45,6 +84,8 @@ function check(label, actual, expected) {
 }
 
 const today = new Date().toISOString().slice(0, 10);
+
+await signIn();
 
 console.log('\n== setup ==');
 const party = await call('POST', '/parties', {

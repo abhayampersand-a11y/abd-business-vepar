@@ -140,3 +140,17 @@ export type LoanRow = LoanAccount & {
   principalPaid: number;
   interestPaid: number;
 };
+
+/* ------------------------------------------------------------------ *
+ * Auth
+ * ------------------------------------------------------------------ */
+
+export type AuthUser = {
+  id: number;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+};
+
+/** `null` when nobody is signed in — the client uses that to redirect. */
+export type MePayload = { user: AuthUser | null };

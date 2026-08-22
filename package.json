@@ -14,7 +14,8 @@
     "db:status": "node scripts/db.mjs status",
     "db:reset": "node scripts/db.mjs reset",
     "db:seed": "node scripts/db.mjs seed",
-    "test:ledger": "node scripts/smoke.mjs"
+    "test:ledger": "node scripts/smoke.mjs",
+    "demo": "node scripts/demo.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

@@ -3,14 +3,38 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, MoreVertical, Circle } from 'lucide-react';
-import { useGetBootstrapQuery } from '@/store/api';
+import { useGetBootstrapQuery, useGetMeQuery } from '@/store/api';
 import { Menu } from '@/components/ui';
+
+/** Persisted redux key — must match the `key` in `persistReducer`. */
+const PERSIST_KEY = 'persist:vyapar-root';
 
 export function Topbar() {
   const router = useRouter();
   const { data } = useGetBootstrapQuery();
+  const { data: me } = useGetMeQuery();
   const firmName = data?.firm?.name;
   const needsSetup = !firmName || firmName === 'My Company';
+
+  const user = me?.user;
+  const initial = user?.name?.trim()?.[0]?.toUpperCase() ?? '?';
+
+  async function signOut() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+
+    // The RTK Query cache is persisted to localStorage, so it has to go too —
+    // otherwise the next person to sign in on this browser would be handed the
+    // previous user's parties and invoices out of the cache.
+    try {
+      window.localStorage.removeItem(PERSIST_KEY);
+    } catch {
+      // Private mode or blocked storage: the server session is gone regardless.
+    }
+
+    // A full document load rather than router.push: it also drops the
+    // in-memory redux store, not just the persisted copy.
+    window.location.href = new URL('/login', window.location.origin).toString();
+  }
 
   return (
     <header className="no-print flex h-14 shrink-0 items-center gap-3 border-b border-line bg-white px-5">
@@ -68,6 +92,21 @@ export function Topbar() {
             { label: 'Verify My Data', onClick: () => router.push('/utilities/verify') },
             { label: 'Backup & Restore', onClick: () => router.push('/sync/backup') },
             { label: 'Plans & Pricing', onClick: () => router.push('/plans') },
+          ]}
+        />
+
+        <Menu
+          trigger={
+            <span
+              title={user?.email ?? undefined}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-white transition hover:brightness-95"
+            >
+              {initial}
+            </span>
+          }
+          items={[
+            { label: user?.name ?? 'Account', onClick: () => router.push('/settings') },
+            { label: 'Sign out', onClick: signOut },
           ]}
         />
       </div>

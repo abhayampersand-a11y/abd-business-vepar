@@ -54,6 +54,29 @@ export const adjustTypeEnum = pgEnum('adjust_type', ['add', 'reduce']);
 export const expenseTypeEnum = pgEnum('expense_type', ['direct', 'indirect']);
 
 /* ------------------------------------------------------------------ *
+ * Users (people who sign in — distinct from parties and firms)
+ * ------------------------------------------------------------------ */
+
+export const users = pgTable(
+  'users',
+  {
+    id: serial('id').primaryKey(),
+    email: text('email').notNull(),
+    name: text('name').notNull(),
+    /** Null for accounts that only ever sign in with Google. */
+    passwordHash: text('password_hash'),
+    /** Google's stable subject id, set once an account is linked. */
+    googleId: text('google_id'),
+    avatarUrl: text('avatar_url'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('users_email_key').on(t.email),
+    uniqueIndex('users_google_id_key').on(t.googleId),
+  ],
+);
+
+/* ------------------------------------------------------------------ *
  * Firms (a Vyapar "company" / business profile)
  * ------------------------------------------------------------------ */
 
@@ -468,3 +491,4 @@ export type LoanAccount = typeof loanAccounts.$inferSelect;
 export type LoanTransaction = typeof loanTransactions.$inferSelect;
 export type TxnType = (typeof txnTypeEnum.enumValues)[number];
 export type TxnStatus = (typeof txnStatusEnum.enumValues)[number];
+export type User = typeof users.$inferSelect;
