@@ -1,0 +1,120 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Sidebar — the deep navy rail */
+  --color-rail: #17203f;
+  --color-rail-hover: #24305a;
+  --color-rail-active: #1f2b52;
+  --color-rail-text: #c7cede;
+  --color-rail-muted: #8e98b4;
+
+  /* Brand */
+  --color-brand: #e5384f;
+  --color-brand-dark: #c92a40;
+  --color-brand-soft: #fdeaec;
+  --color-accent: #2f6fed;
+  --color-accent-soft: #e8f0fe;
+  --color-gold: #f2a03d;
+  --color-gold-soft: #fff5e5;
+
+  /* Semantic */
+  --color-success: #12855a;
+  --color-success-soft: #e4f6ee;
+  --color-warning: #d97706;
+  --color-warning-soft: #fef3e2;
+  --color-danger: #d62d3f;
+  --color-danger-soft: #fdecee;
+
+  /* Surfaces */
+  --color-canvas: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-line: #e4e8f0;
+  --color-line-strong: #cdd4e2;
+  --color-ink: #1b2338;
+  --color-ink-soft: #5a6480;
+  --color-ink-faint: #8b93a8;
+
+  --radius-card: 12px;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Slim scrollbars so dense tables don't feel heavy */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c3cad8;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a7b0c2;
+}
+
+/* Number inputs: hide the spinners, they fight with currency entry */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+@utility card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+@utility focus-ring {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgb(47 111 237 / 0.15);
+}
+
+/* Printing: only the invoice sheet survives */
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
