@@ -9,8 +9,13 @@ neonConfig.webSocketConstructor = ws;
 
 const connectionString = process.env.DATABASE_URL;
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL is not set — add it to .env');
+// `next build` imports every route module to collect metadata, so throwing at
+// import time would fail the build on a host that only injects this at runtime.
+// Fail on the first query instead, where `handler` turns it into JSON.
+if (!connectionString && process.env.NEXT_PHASE !== 'phase-production-build') {
+  throw new Error(
+    "DATABASE_URL is not set — add it to .env locally, or to your deployment host's environment variables.",
+  );
 }
 
 // Reuse the pool across hot reloads in dev, otherwise every edit leaks sockets.
