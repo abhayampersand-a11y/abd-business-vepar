@@ -264,6 +264,16 @@ export const transactions = pgTable(
 
     subtotal: numeric('subtotal', { precision: 14, scale: 2 }).default('0').notNull(),
     discountAmount: numeric('discount_amount', { precision: 14, scale: 2 }).default('0').notNull(),
+    /**
+     * The invoice-level discount as the user typed it — either a percent or a
+     * flat rupee figure. `discountAmount` above is the resolved total (line
+     * discounts plus this one), so the raw entry is kept here to reopen the
+     * form on exactly the figure that was entered.
+     */
+    invoiceDiscountMode: text('invoice_discount_mode').default('percent').notNull(),
+    invoiceDiscountValue: numeric('invoice_discount_value', { precision: 14, scale: 2 })
+      .default('0')
+      .notNull(),
     taxAmount: numeric('tax_amount', { precision: 14, scale: 2 }).default('0').notNull(),
     roundOff: numeric('round_off', { precision: 14, scale: 2 }).default('0').notNull(),
     totalAmount: numeric('total_amount', { precision: 14, scale: 2 }).default('0').notNull(),
@@ -328,6 +338,8 @@ export const transactionItems = pgTable(
     isTaxInclusive: boolean('is_tax_inclusive').default(false).notNull(),
     discountPercent: numeric('discount_percent', { precision: 5, scale: 2 }).default('0').notNull(),
     discountAmount: numeric('discount_amount', { precision: 14, scale: 2 }).default('0').notNull(),
+    /** Which of the two figures above the user typed; the other is derived. */
+    discountMode: text('discount_mode').default('percent').notNull(),
     taxRate: numeric('tax_rate', { precision: 5, scale: 2 }).default('0').notNull(),
     taxAmount: numeric('tax_amount', { precision: 14, scale: 2 }).default('0').notNull(),
     total: numeric('total', { precision: 14, scale: 2 }).default('0').notNull(),

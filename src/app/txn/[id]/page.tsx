@@ -12,7 +12,7 @@ import { Button, Spinner, ConfirmDialog } from '@/components/ui';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { TXN_META } from '@/lib/constants';
 import { formatCurrency, formatDate, formatQty, num, amountInWords } from '@/lib/format';
-import { isIntraState, splitGST } from '@/lib/calc';
+import { isIntraState, splitGST, splitStoredTotals } from '@/lib/calc';
 import { useAppDispatch } from '@/store/hooks';
 import { pushToast } from '@/store/uiSlice';
 import { useState } from 'react';
@@ -49,6 +49,8 @@ function TransactionView({ id }: { id: number }) {
   const meta = TXN_META[txn.txnType];
   const firm = bootstrap?.firm;
   const intraState = isIntraState(firm?.state, txn.party?.state);
+
+  const figures = splitStoredTotals(txn, txn.lineItems);
 
   const taxByRate = new Map<number, { taxable: number; tax: number }>();
   for (const l of txn.lineItems) {
@@ -277,12 +279,18 @@ function TransactionView({ id }: { id: number }) {
                   <td className="border border-line px-2 py-1.5 text-right">
                     {formatQty(txn.lineItems.reduce((s, l) => s + num(l.quantity), 0))}
                   </td>
-                  <td className="border border-line px-2 py-1.5" colSpan={3} />
+                  <td className="border border-line px-2 py-1.5" colSpan={2} />
+                  {/* Column footers total the columns above them, not the document. */}
                   <td className="border border-line px-2 py-1.5 text-right">
-                    {formatCurrency(txn.taxAmount, { symbol: false })}
+                    {figures.lineDiscount
+                      ? formatCurrency(figures.lineDiscount, { symbol: false })
+                      : '—'}
                   </td>
                   <td className="border border-line px-2 py-1.5 text-right">
-                    {formatCurrency(txn.totalAmount, { symbol: false })}
+                    {formatCurrency(figures.lineTax, { symbol: false })}
+                  </td>
+                  <td className="border border-line px-2 py-1.5 text-right">
+                    {formatCurrency(figures.lineAmount, { symbol: false })}
                   </td>
                 </tr>
               </tbody>
@@ -373,13 +381,20 @@ function TransactionView({ id }: { id: number }) {
 
             <div className="space-y-1.5 text-[12.5px]">
               <Row label="Sub Total" value={formatCurrency(txn.subtotal, { symbol: false })} />
-              {num(txn.discountAmount) > 0 && (
+              {/* Sub Total is already net of line discounts; only the invoice-level one goes here. */}
+              {figures.invoiceDiscount > 0 && (
                 <Row
                   label="Discount"
-                  value={`− ${formatCurrency(txn.discountAmount, { symbol: false })}`}
+                  value={`− ${formatCurrency(figures.invoiceDiscount, { symbol: false })}`}
                 />
               )}
               <Row label="Total Tax" value={formatCurrency(txn.taxAmount, { symbol: false })} />
+              {figures.additionalCharges !== 0 && (
+                <Row
+                  label="Additional Charges"
+                  value={formatCurrency(figures.additionalCharges, { symbol: false })}
+                />
+              )}
               {num(txn.roundOff) !== 0 && (
                 <Row label="Round Off" value={formatCurrency(txn.roundOff, { symbol: false })} />
               )}

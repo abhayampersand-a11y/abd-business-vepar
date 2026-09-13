@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, ArrowLeft, Save } from 'lucide-react';
+import clsx from 'clsx';
 import {
   useGetPartiesQuery,
   useGetItemsQuery,
@@ -18,13 +19,19 @@ import { Combobox } from '@/components/ui/Combobox';
 import { PartyFormModal } from '@/components/parties/PartyFormModal';
 import { ItemFormModal } from '@/components/items/ItemFormModal';
 import { TXN_META, PAYMENT_TYPES, GST_RATES } from '@/lib/constants';
-import { computeTotals, type LineInput } from '@/lib/calc';
-import { formatCurrency, toISODate, num, addDays, amountInWords } from '@/lib/format';
+import {
+  computeTotals,
+  type DiscountMode,
+  type LineComputed,
+  type LineInput,
+} from '@/lib/calc';
+import { formatCurrency, toISODate, num, addDays, amountInWords, round2 } from '@/lib/format';
 import { useAppDispatch } from '@/store/hooks';
 import { pushToast } from '@/store/uiSlice';
 import type { TxnType, TransactionDetail } from '@/types';
 
-type FormLine = LineInput & { key: string };
+/** `discountMode` says which of the two discount inputs a row is showing. */
+type FormLine = LineInput & { key: string; discountMode: DiscountMode };
 
 const blankLine = (): FormLine => ({
   key: crypto.randomUUID(),
@@ -35,7 +42,9 @@ const blankLine = (): FormLine => ({
   unit: 'Pcs',
   pricePerUnit: '',
   isTaxInclusive: false,
+  discountMode: 'percent',
   discountPercent: '',
+  discountAmount: '',
   taxRate: '0',
 });
 
@@ -103,12 +112,20 @@ export function TransactionForm({
           unit: l.unit ?? 'Pcs',
           pricePerUnit: l.pricePerUnit,
           isTaxInclusive: l.isTaxInclusive,
-          discountPercent: l.discountPercent,
+          // Reopen on the figure that was typed, not on its derived twin.
+          discountMode: l.discountMode === 'amount' ? 'amount' : 'percent',
+          discountPercent: l.discountMode === 'amount' ? '' : l.discountPercent,
+          discountAmount: l.discountMode === 'amount' ? l.discountAmount : '',
           taxRate: l.taxRate,
         }))
       : [blankLine()],
   );
-  const [invoiceDiscountPercent, setInvoiceDiscountPercent] = useState('');
+  const [invoiceDiscountMode, setInvoiceDiscountMode] = useState<DiscountMode>(
+    source?.invoiceDiscountMode === 'amount' ? 'amount' : 'percent',
+  );
+  const [invoiceDiscountValue, setInvoiceDiscountValue] = useState(() =>
+    source && num(source.invoiceDiscountValue) > 0 ? String(num(source.invoiceDiscountValue)) : '',
+  );
   const [additionalCharges, setAdditionalCharges] = useState('');
   const [roundOffEnabled, setRoundOffEnabled] = useState(
     source ? num(source.roundOff) !== 0 : true,
@@ -152,12 +169,22 @@ export function TransactionForm({
     () =>
       computeTotals({
         lines: lines.filter((l) => l.itemName.trim()),
-        invoiceDiscountPercent,
+        invoiceDiscountMode,
+        invoiceDiscountPercent: invoiceDiscountMode === 'percent' ? invoiceDiscountValue : 0,
+        invoiceDiscountAmount: invoiceDiscountMode === 'amount' ? invoiceDiscountValue : 0,
         additionalCharges,
         roundOffEnabled,
         receivedAmount: fullyPaid ? Number.MAX_SAFE_INTEGER : receivedAmount,
       }),
-    [lines, invoiceDiscountPercent, additionalCharges, roundOffEnabled, receivedAmount, fullyPaid],
+    [
+      lines,
+      invoiceDiscountMode,
+      invoiceDiscountValue,
+      additionalCharges,
+      roundOffEnabled,
+      receivedAmount,
+      fullyPaid,
+    ],
   );
 
   const partyOptions = useMemo(
@@ -182,12 +209,12 @@ export function TransactionForm({
         value: i.id,
         label: i.name,
         hint: i.itemCode ?? undefined,
-        meta:
-          i.type === 'product'
-            ? `${num(i.stockQty)} ${i.unitShort}`
-            : formatCurrency(i.salePrice, { symbol: false }),
+        // The price this line would actually pick up, so the user can compare
+        // before choosing; stock sits underneath it for products.
+        meta: formatCurrency(isPurchaseSide ? i.purchasePrice : i.salePrice),
+        metaHint: i.type === 'product' ? `${num(i.stockQty)} ${i.unitShort}` : undefined,
       })),
-    [items],
+    [items, isPurchaseSide],
   );
 
   // Open invoices this payment can be settled against.
@@ -201,6 +228,50 @@ export function TransactionForm({
   /* --------------------------- handlers --------------------------- */
   const setLine = (key: string, patch: Partial<FormLine>) =>
     setLines((ls) => ls.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+
+  /** The one discount box a row shows, whichever mode it is in. */
+  const lineDiscountValue = (line: FormLine) =>
+    String((line.discountMode === 'amount' ? line.discountAmount : line.discountPercent) ?? '');
+
+  const setLineDiscount = (line: FormLine, value: string) =>
+    setLine(
+      line.key,
+      line.discountMode === 'amount'
+        ? { discountAmount: value, discountPercent: '' }
+        : { discountPercent: value, discountAmount: '' },
+    );
+
+  /**
+   * Switching % to rupees (or back) carries the already-computed equivalent
+   * across, so the money on the row does not jump under the user.
+   */
+  const setLineDiscountMode = (
+    line: FormLine,
+    computed: LineComputed | undefined,
+    mode: DiscountMode,
+  ) => {
+    if (mode === line.discountMode) return;
+    const carried =
+      mode === 'amount' ? (computed?.discountAmount ?? 0) : (computed?.discountPercent ?? 0);
+    const value = carried > 0 ? String(carried) : '';
+    setLine(line.key, {
+      discountMode: mode,
+      discountPercent: mode === 'percent' ? value : '',
+      discountAmount: mode === 'amount' ? value : '',
+    });
+  };
+
+  const changeInvoiceDiscountMode = (mode: DiscountMode) => {
+    if (mode === invoiceDiscountMode) return;
+    const carried =
+      mode === 'amount'
+        ? totals.invoiceDiscount
+        : totals.subtotal > 0
+          ? round2((totals.invoiceDiscount / totals.subtotal) * 100)
+          : 0;
+    setInvoiceDiscountMode(mode);
+    setInvoiceDiscountValue(carried > 0 ? String(carried) : '');
+  };
 
   const pickItem = (key: string, itemId: number) => {
     const item = items.find((i) => i.id === itemId);
@@ -216,7 +287,9 @@ export function TransactionForm({
         ? item.purchasePriceTaxInclusive
         : item.salePriceTaxInclusive,
       taxRate: item.taxRate,
+      discountMode: 'percent',
       discountPercent: num(item.discountValue) || '',
+      discountAmount: '',
       quantity: '1',
     });
   };
@@ -260,7 +333,9 @@ export function TransactionForm({
       lines: isPayment
         ? []
         : lines.filter((l) => l.itemName.trim()).map((l) => ({ ...l, key: undefined })),
-      invoiceDiscountPercent: num(invoiceDiscountPercent),
+      invoiceDiscountMode,
+      invoiceDiscountPercent: invoiceDiscountMode === 'percent' ? num(invoiceDiscountValue) : 0,
+      invoiceDiscountAmount: invoiceDiscountMode === 'amount' ? num(invoiceDiscountValue) : 0,
       additionalCharges: num(additionalCharges),
       roundOffEnabled,
       totalAmount: isPayment ? num(paymentAmount) : undefined,
@@ -316,7 +391,8 @@ export function TransactionForm({
     setLines([blankLine()]);
     setReceivedAmount('');
     setPaymentAmount('');
-    setInvoiceDiscountPercent('');
+    setInvoiceDiscountMode('percent');
+    setInvoiceDiscountValue('');
     setAdditionalCharges('');
     setDescription('');
     setNotes('');
@@ -547,7 +623,7 @@ export function TransactionForm({
                       <th className="w-24 px-3 py-2.5 text-right font-medium">QTY</th>
                       <th className="w-20 px-3 py-2.5 text-left font-medium">UNIT</th>
                       <th className="w-32 px-3 py-2.5 text-right font-medium">PRICE/UNIT</th>
-                      <th className="w-24 px-3 py-2.5 text-right font-medium">DISC %</th>
+                      <th className="w-40 px-3 py-2.5 text-right font-medium">DISCOUNT</th>
                       <th className="w-28 px-3 py-2.5 text-right font-medium">TAX</th>
                       <th className="w-32 px-3 py-2.5 text-right font-medium">AMOUNT</th>
                       <th className="w-10 px-2" />
@@ -624,14 +700,27 @@ export function TransactionForm({
                             </label>
                           </td>
                           <td className="px-2 py-1.5">
-                            <Input
-                              type="number"
-                              value={String(line.discountPercent ?? '')}
-                              onChange={(e) =>
-                                setLine(line.key, { discountPercent: e.target.value })
-                              }
-                              className="h-8.5 text-right"
-                            />
+                            <div className="flex items-center gap-1">
+                              <Input
+                                type="number"
+                                value={lineDiscountValue(line)}
+                                onChange={(e) => setLineDiscount(line, e.target.value)}
+                                className="h-8.5 text-right"
+                              />
+                              <DiscountModeToggle
+                                mode={line.discountMode}
+                                onChange={(m) => setLineDiscountMode(line, computed, m)}
+                                className="h-8.5"
+                              />
+                            </div>
+                            {computed && computed.discountAmount > 0 && (
+                              <p className="mt-1 text-right text-[11px] text-ink-faint">
+                                {line.discountMode === 'percent'
+                                  ? '−' +
+                                    formatCurrency(computed.discountAmount, { symbol: false })
+                                  : computed.discountPercent + '%'}
+                              </p>
+                            )}
                           </td>
                           <td className="px-2 py-1.5">
                             <Select
@@ -735,13 +824,16 @@ export function TransactionForm({
                   <div className="flex items-center gap-1.5">
                     <Input
                       type="number"
-                      value={invoiceDiscountPercent}
-                      onChange={(e) => setInvoiceDiscountPercent(e.target.value)}
+                      value={invoiceDiscountValue}
+                      onChange={(e) => setInvoiceDiscountValue(e.target.value)}
                       placeholder="0"
                       className="h-8 w-16 text-right"
                     />
-                    <span className="text-[12px] text-ink-faint">%</span>
-                    <span className="w-24 text-right text-[13px] text-ink">
+                    <DiscountModeToggle
+                      mode={invoiceDiscountMode}
+                      onChange={changeInvoiceDiscountMode}
+                    />
+                    <span className="w-20 text-right text-[13px] text-ink">
                       −{formatCurrency(totals.invoiceDiscount, { symbol: false })}
                     </span>
                   </div>
@@ -873,6 +965,42 @@ export function TransactionForm({
           }}
         />
       )}
+    </div>
+  );
+}
+
+/** The % / rupee switch that sits beside every discount box. */
+function DiscountModeToggle({
+  mode,
+  onChange,
+  className,
+}: {
+  mode: DiscountMode;
+  onChange: (mode: DiscountMode) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={clsx(
+        'inline-flex h-8 shrink-0 overflow-hidden rounded-lg border border-line-strong bg-white',
+        className,
+      )}
+    >
+      {(['percent', 'amount'] as const).map((m) => (
+        <button
+          key={m}
+          type="button"
+          aria-pressed={mode === m}
+          aria-label={m === 'percent' ? 'Discount in percent' : 'Discount in rupees'}
+          onClick={() => onChange(m)}
+          className={clsx(
+            'h-full w-6.5 text-[12px] font-medium transition-colors',
+            mode === m ? 'bg-accent text-white' : 'text-ink-faint hover:bg-canvas',
+          )}
+        >
+          {m === 'percent' ? '%' : '₹'}
+        </button>
+      ))}
     </div>
   );
 }

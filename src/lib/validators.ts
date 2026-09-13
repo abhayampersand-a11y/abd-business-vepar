@@ -11,6 +11,9 @@ export const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected a yyyy-mm-dd date');
 
+/** A discount is typed either as a percent or as a flat rupee figure. */
+export const discountMode = z.enum(['percent', 'amount']);
+
 export const lineSchema = z.object({
   itemId: optionalId,
   itemName: z.string().min(1, 'Item name is required'),
@@ -19,6 +22,7 @@ export const lineSchema = z.object({
   unit: z.string().nullish(),
   pricePerUnit: money,
   isTaxInclusive: z.boolean().optional().default(false),
+  discountMode: discountMode.optional(),
   discountPercent: money.optional(),
   discountAmount: money.optional(),
   taxRate: money.optional(),
@@ -33,6 +37,7 @@ export const transactionSchema = z.object({
   dueDate: isoDate.nullish(),
   refNo: z.string().nullish(),
   lines: z.array(lineSchema).default([]),
+  invoiceDiscountMode: discountMode.optional(),
   invoiceDiscountPercent: money.optional(),
   invoiceDiscountAmount: money.optional(),
   additionalCharges: money.optional(),

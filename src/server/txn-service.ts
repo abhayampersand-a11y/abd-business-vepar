@@ -102,6 +102,8 @@ function buildRow(
         refNo: input.refNo ?? null,
         subtotal: String(total),
         discountAmount: '0',
+        invoiceDiscountMode: 'percent',
+        invoiceDiscountValue: '0',
         taxAmount: '0',
         roundOff: '0',
         totalAmount: String(total),
@@ -129,6 +131,7 @@ function buildRow(
 
   const totals = computeTotals({
     lines: input.lines,
+    invoiceDiscountMode: input.invoiceDiscountMode,
     invoiceDiscountPercent: input.invoiceDiscountPercent,
     invoiceDiscountAmount: input.invoiceDiscountAmount,
     additionalCharges: input.additionalCharges,
@@ -164,6 +167,8 @@ function buildRow(
       refNo: input.refNo ?? null,
       subtotal: String(totals.subtotal),
       discountAmount: String(totals.discountAmount),
+      invoiceDiscountMode: totals.invoiceDiscountMode,
+      invoiceDiscountValue: String(totals.invoiceDiscountValue),
       taxAmount: String(totals.taxAmount),
       roundOff: String(totals.roundOff),
       totalAmount: String(totals.totalAmount),
@@ -199,6 +204,7 @@ function lineValues(txnId: number, lines: ReturnType<typeof computeTotals>['line
     unit: l.unit,
     pricePerUnit: String(l.pricePerUnit),
     isTaxInclusive: l.isTaxInclusive,
+    discountMode: l.discountMode,
     discountPercent: String(l.discountPercent),
     discountAmount: String(l.discountAmount),
     taxRate: String(l.taxRate),
