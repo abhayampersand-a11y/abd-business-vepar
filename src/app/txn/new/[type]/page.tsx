@@ -4,7 +4,7 @@ import { use, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TransactionForm } from '@/components/txn/TransactionForm';
 import { Spinner } from '@/components/ui';
-import { useGetTransactionQuery } from '@/store/api';
+import { useGetTransactionQuery, useGetItemsQuery } from '@/store/api';
 import { TXN_META } from '@/lib/constants';
 import type { TxnType } from '@/types';
 
@@ -42,15 +42,26 @@ function NewTransactionInner({ type }: { type: TxnType }) {
   // state on mount rather than filling itself in after the fact.
   const { data: source, isLoading } = useGetTransactionQuery(sourceId!, { skip: !sourceId });
 
+  // ?item=<id> (from a scanned label) starts the bill on that item. Same query
+  // args as the form's item list, so this is one request shared by both.
+  const presetItemId = numberOrUndefined('item');
+  const { data: items, isLoading: itemsLoading } = useGetItemsQuery(
+    { active: 'true' },
+    { skip: !presetItemId },
+  );
+  const presetItem = presetItemId ? items?.find((i) => i.id === presetItemId) : undefined;
+
   if (sourceId && isLoading) return <Spinner label="Loading document…" />;
+  if (presetItemId && itemsLoading) return <Spinner label="Loading item…" />;
 
   return (
     <TransactionForm
-      key={source?.id ?? 'new'}
+      key={source?.id ?? presetItem?.id ?? 'new'}
       txnType={type}
       source={source}
       convertId={convertId}
       presetPartyId={numberOrUndefined('partyId')}
+      presetItem={presetItem}
     />
   );
 }

@@ -155,6 +155,15 @@ export const api = createApi({
       providesTags: (_r, _e, id) => [{ type: 'Item', id }],
     }),
 
+    /** Resolves a scanned code or label URL; 404 when no item has it. */
+    getItemByCode: build.query<ItemRow, string>({
+      query: (code) => ({ url: '/items/lookup', params: { code } }),
+      providesTags: (result) =>
+        result
+          ? [{ type: 'Item', id: result.id }, { type: 'Item', id: 'LIST' }]
+          : [{ type: 'Item', id: 'LIST' }],
+    }),
+
     addItem: build.mutation<Item, Record<string, unknown>>({
       query: (body) => ({ url: '/items', method: 'POST', body }),
       invalidatesTags: [{ type: 'Item', id: 'LIST' }, ...DERIVED],
@@ -406,6 +415,7 @@ export const {
   useDeletePartyMutation,
   useGetItemsQuery,
   useGetItemQuery,
+  useGetItemByCodeQuery,
   useAddItemMutation,
   useUpdateItemMutation,
   useDeleteItemMutation,

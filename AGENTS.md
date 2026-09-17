@@ -48,6 +48,14 @@ Utilities → Verify My Data. If you change posting logic, make sure that functi
 - Invoice arithmetic lives in `src/lib/calc.ts` and is shared by the entry form and the API, so
   the number the user watches while typing is the number that gets stored. Don't duplicate it.
 
+## Item codes and QR labels
+
+`items.itemCode` is unique per firm ignoring case (`items_firm_code_key`) and never blank: create,
+edit and import all go through `resolveItemCode` (`src/server/item-code.ts`), which turns a blank
+code into `ITM<id>`. A label's QR encodes `<origin>/i/<code>`, never a price. Anything reading a
+scan runs it through `codeFromScan` (`src/lib/item-code.ts`) so a bare barcode and a label URL
+resolve the same way.
+
 ## Client data
 
 RTK Query with tag-based invalidation; the whole cache is persisted via redux-persist. When you
@@ -72,3 +80,11 @@ npm run typecheck && npm run lint && npm run build
 
 There is an end-to-end ledger test that exercises posting, editing, deleting, allocation, tax
 handling and the reports against a running dev server. Keep it passing.
+
+## Keep the app guide in step
+
+`docs/app-guide-ane-test-cases.md` (Gujarati) documents every screen, what each button does,
+where each action is reflected, the test cases and the known issues. Any change to a screen, a
+button or a posting rule updates it in the same piece of work: the screen section, the "કઈ ક્રિયાથી
+ક્યાં અસર" table, the test cases, and a dated row in "ફેરફારની નોંધ". A fixed known issue (KI-xx)
+moves out of the issues table into that change log.

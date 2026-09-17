@@ -25,7 +25,8 @@ a bank account). `npm run db:reset` clears it again.
 statement per party.
 
 **Items** — products and services, categories, units, HSN/SAC, tax rates, opening stock, minimum
-stock alerts and manual stock adjustments.
+stock alerts and manual stock adjustments. Every item has a unique code (typed, or generated as
+`ITM00042`) and a square QR label for it — see *QR labels* below.
 
 **Sale** — invoices, estimates/quotations, proforma invoices, payment-in, sale orders, delivery
 challans and credit notes (sale returns).
@@ -102,6 +103,12 @@ src/
 scripts/db.mjs      status / reset / seed
 ```
 
+## Guide and test cases
+
+[docs/app-guide-ane-test-cases.md](docs/app-guide-ane-test-cases.md) (Gujarati) walks through every
+screen and button, shows where each action is reflected, and lists the manual test cases and known
+issues. Update it with every change.
+
 ## Scripts
 
 | Command | What it does |
@@ -115,6 +122,26 @@ scripts/db.mjs      status / reset / seed
 | `npm run db:status` | Row counts per table |
 | `npm run db:seed` | Load demo data |
 | `npm run db:reset` | Clear business data, keep the firm setup |
+| `npm run db:item-codes` | Give every existing item a unique code (run before `db:push` on an older database) |
+
+## QR labels
+
+Each item's QR encodes a link, `<your-domain>/i/<item code>` — never the price, so a label stays
+right when prices change.
+
+- **Phone camera** — scanning a label opens a phone-sized item page: stock, prices, recent
+  transactions, and buttons to sell, purchase or adjust stock.
+- **Billing** — the invoice form has a scan box. A USB/Bluetooth scanner types the label (or a
+  product's printed barcode) and Enter adds the item; scanning it again adds another unit. The
+  **Camera** button does the same on a phone or laptop (needs https, or localhost).
+- **Printing** — the QR tile on an item, or **Utilities → Item QR Labels** for many items at once.
+
+Labels use the address the app is opened on. If you print from `localhost` or a LAN address, set
+`NEXT_PUBLIC_APP_URL` to the address phones will reach, or the labels won't open on a phone.
+
+**Upgrading an existing database:** item codes are now unique per business (ignoring case). Run
+`npm run db:item-codes` once — it fills blank codes and renames duplicates — then `npm run db:push`.
+If you apply `drizzle/` migrations instead, `0002_item_codes.sql` does the same.
 
 ## Notes
 
@@ -122,5 +149,5 @@ scripts/db.mjs      status / reset / seed
   the business profile for this to work.
 - Prices can be entered inclusive or exclusive of tax per line; the taxable value is backed out
   when inclusive.
-- The premium-feature screens (WhatsApp Connect, Tally sync, barcode labels, POS) describe what
+- The premium-feature screens (WhatsApp Connect, Tally sync, POS) describe what
   they would do and point at the working alternative — they are not wired to a paid service.

@@ -75,8 +75,9 @@ const GROUPS: Array<{ title: string; settings: ToggleSetting[] }> = [
     settings: [
       {
         key: 'item_barcode_enabled',
-        label: 'Barcode scanning',
-        description: 'Add items to an invoice by scanning their barcode.',
+        label: 'QR / barcode scanning',
+        description: 'Add items to an invoice by scanning their QR label or barcode.',
+        defaultOn: true,
       },
       {
         key: 'item_wise_discount',

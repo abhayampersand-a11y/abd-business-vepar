@@ -5,6 +5,7 @@ import { getActiveFirmId } from '@/server/firm';
 import { handler, ok, created } from '@/server/http';
 import { itemSchema } from '@/lib/validators';
 import { num } from '@/lib/format';
+import { reserveItemId, resolveItemCode } from '@/server/item-code';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,32 +55,40 @@ export const POST = handler(async (request: Request) => {
   // Services carry no stock, so the opening quantity is forced to zero.
   const opening = body.type === 'service' ? 0 : num(body.openingStock);
 
-  const [row] = await db
-    .insert(items)
-    .values({
-      firmId,
-      name: body.name,
-      type: body.type,
-      itemCode: body.itemCode ?? null,
-      hsnSac: body.hsnSac ?? null,
-      categoryId: body.categoryId,
-      unitId: body.unitId,
-      description: body.description ?? null,
-      salePrice: String(num(body.salePrice)),
-      salePriceTaxInclusive: body.salePriceTaxInclusive ?? false,
-      purchasePrice: String(num(body.purchasePrice)),
-      purchasePriceTaxInclusive: body.purchasePriceTaxInclusive ?? false,
-      taxRate: String(num(body.taxRate)),
-      discountType: body.discountType ?? 'percent',
-      discountValue: String(num(body.discountValue)),
-      openingStock: String(opening),
-      openingStockPrice: String(num(body.openingStockPrice)),
-      openingStockDate: body.openingStockDate ?? null,
-      stockQty: String(opening),
-      minStockLevel: String(num(body.minStockLevel)),
-      location: body.location ?? null,
-    })
-    .returning();
+  const row = await db.transaction(async (tx) => {
+    // The id is taken first so a blank code can become ITM<id> in this insert.
+    const id = await reserveItemId(tx);
+    const itemCode = await resolveItemCode(tx, firmId, body.itemCode, id);
+
+    const [inserted] = await tx
+      .insert(items)
+      .values({
+        id,
+        firmId,
+        name: body.name,
+        type: body.type,
+        itemCode,
+        hsnSac: body.hsnSac ?? null,
+        categoryId: body.categoryId,
+        unitId: body.unitId,
+        description: body.description ?? null,
+        salePrice: String(num(body.salePrice)),
+        salePriceTaxInclusive: body.salePriceTaxInclusive ?? false,
+        purchasePrice: String(num(body.purchasePrice)),
+        purchasePriceTaxInclusive: body.purchasePriceTaxInclusive ?? false,
+        taxRate: String(num(body.taxRate)),
+        discountType: body.discountType ?? 'percent',
+        discountValue: String(num(body.discountValue)),
+        openingStock: String(opening),
+        openingStockPrice: String(num(body.openingStockPrice)),
+        openingStockDate: body.openingStockDate ?? null,
+        stockQty: String(opening),
+        minStockLevel: String(num(body.minStockLevel)),
+        location: body.location ?? null,
+      })
+      .returning();
+    return inserted;
+  });
 
   return created(row);
 });

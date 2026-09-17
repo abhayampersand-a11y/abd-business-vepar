@@ -14,6 +14,7 @@
     "db:status": "node scripts/db.mjs status",
     "db:reset": "node scripts/db.mjs reset",
     "db:seed": "node scripts/db.mjs seed",
+    "db:item-codes": "node scripts/db.mjs item-codes",
     "test:ledger": "node scripts/smoke.mjs",
     "demo": "node scripts/demo.mjs"
   },
@@ -23,12 +24,14 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.2",
+    "jsqr": "^1.4.0",
     "lucide-react": "^1.33.0",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-redux": "^9.3.0",
     "redux-persist": "^6.0.0",
+    "uqr": "^0.1.3",
     "ws": "^8.21.3",
     "zod": "^4.4.3"
   },

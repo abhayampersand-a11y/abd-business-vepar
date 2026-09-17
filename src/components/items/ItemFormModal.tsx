@@ -194,11 +194,11 @@ export function ItemFormModal({
           </Select>
         </Field>
 
-        <Field label="Item Code">
+        <Field label="Item Code" hint="Its QR label encodes this. Leave blank to auto-generate.">
           <Input
             value={draft.itemCode}
             onChange={(e) => set('itemCode', e.target.value)}
-            placeholder="SKU / barcode"
+            placeholder="SKU / barcode / auto"
           />
         </Field>
         <Field label={isService ? 'SAC Code' : 'HSN Code'}>

@@ -12,6 +12,8 @@ import {
   Pencil,
   ChevronDown,
   FileSpreadsheet,
+  QrCode as QrIcon,
+  ScanLine,
 } from 'lucide-react';
 import {
   useGetItemsQuery,
@@ -40,6 +42,10 @@ import { DataTable, type Column } from '@/components/ui/DataTable';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { ItemFormModal } from '@/components/items/ItemFormModal';
 import { StockAdjustModal } from '@/components/items/StockAdjustModal';
+import { QrCode } from '@/components/items/QrCode';
+import { ItemQrModal } from '@/components/items/ItemQrModal';
+import { CameraScanModal } from '@/components/items/CameraScanModal';
+import { codeFromScan, itemQrUrl } from '@/lib/item-code';
 import { formatCurrency, formatDate, formatQty, num } from '@/lib/format';
 import { useSelection } from '@/lib/useSelection';
 import { TXN_META } from '@/lib/constants';
@@ -75,6 +81,8 @@ function ItemsScreen() {
   const [editing, setEditing] = useState<Item | null>(null);
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<ItemRow | null>(null);
+  const [qrItem, setQrItem] = useState<Item | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const itemType = tab === 'services' ? 'service' : 'product';
   const listActive = tab === 'products' || tab === 'services';
@@ -141,6 +149,11 @@ function ItemsScreen() {
                 setEditing(i);
                 setFormOpen(true);
               },
+            },
+            {
+              label: 'QR Code & Labels',
+              icon: <QrIcon size={14} />,
+              onClick: () => setQrItem(i),
             },
             ...(i.type === 'product'
               ? [
@@ -270,6 +283,14 @@ function ItemsScreen() {
                   <Search size={16} />
                 </button>
               )}
+              <button
+                onClick={() => setScanOpen(true)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas text-ink-soft transition hover:text-ink"
+                aria-label="Scan an item's QR code"
+                title="Scan QR code"
+              >
+                <ScanLine size={16} />
+              </button>
 
               <div className="ml-auto flex items-center">
                 <Button
@@ -318,6 +339,7 @@ function ItemsScreen() {
                   { label: 'Assign Units', onClick: () => setTab('units') },
                   { label: 'Bulk Update Items', onClick: () => router.push('/utilities/bulk-update') },
                   { label: 'Export Items', onClick: () => router.push('/utilities/export-items') },
+                  { label: 'Print QR Labels', onClick: () => router.push('/utilities/barcode') },
                 ]}
               />
             </div>
@@ -371,6 +393,11 @@ function ItemsScreen() {
                       <h2 className="text-[16px] font-semibold uppercase text-ink">
                         {selected.name}
                       </h2>
+                      {selected.itemCode && (
+                        <p className="mt-0.5 font-mono text-[12.5px] text-ink-soft">
+                          {selected.itemCode}
+                        </p>
+                      )}
                       <div className="mt-3 flex flex-wrap gap-6">
                         <Stat
                           label="Sale Price"
@@ -403,6 +430,16 @@ function ItemsScreen() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                      {selected.itemCode && (
+                        <button
+                          onClick={() => setQrItem(selected)}
+                          className="rounded-lg border border-line bg-white p-1 transition hover:border-accent"
+                          aria-label="Show QR code and print labels"
+                          title="QR code & labels"
+                        >
+                          <QrCode value={itemQrUrl(selected.itemCode)} size={64} />
+                        </button>
+                      )}
                       {selected.type === 'product' && (
                         <Button
                           variant="accent"
@@ -474,6 +511,18 @@ function ItemsScreen() {
           open
           onClose={() => setAdjustOpen(false)}
           item={selected}
+        />
+      )}
+
+      {qrItem && <ItemQrModal key={qrItem.id} item={qrItem} onClose={() => setQrItem(null)} />}
+
+      {scanOpen && (
+        <CameraScanModal
+          onClose={() => setScanOpen(false)}
+          onScan={(text) => {
+            const code = codeFromScan(text);
+            if (code) router.push(`/i/${encodeURIComponent(code)}`);
+          }}
         />
       )}
 

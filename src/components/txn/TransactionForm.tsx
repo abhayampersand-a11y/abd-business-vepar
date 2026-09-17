@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, ArrowLeft, Save } from 'lucide-react';
+import { Plus, X, ArrowLeft, Save, Camera, ScanLine } from 'lucide-react';
 import clsx from 'clsx';
 import {
   useGetPartiesQuery,
@@ -18,17 +18,27 @@ import { Button, Field, Input, Select, Textarea, Checkbox } from '@/components/u
 import { Combobox } from '@/components/ui/Combobox';
 import { PartyFormModal } from '@/components/parties/PartyFormModal';
 import { ItemFormModal } from '@/components/items/ItemFormModal';
+import { CameraScanModal, type ScanOutcome } from '@/components/items/CameraScanModal';
 import { TXN_META, PAYMENT_TYPES, GST_RATES } from '@/lib/constants';
+import { codeFromScan, sameItemCode } from '@/lib/item-code';
 import {
   computeTotals,
   type DiscountMode,
   type LineComputed,
   type LineInput,
 } from '@/lib/calc';
-import { formatCurrency, toISODate, num, addDays, amountInWords, round2 } from '@/lib/format';
+import {
+  formatCurrency,
+  toISODate,
+  num,
+  addDays,
+  amountInWords,
+  round2,
+  round3,
+} from '@/lib/format';
 import { useAppDispatch } from '@/store/hooks';
 import { pushToast } from '@/store/uiSlice';
-import type { TxnType, TransactionDetail } from '@/types';
+import type { TxnType, TransactionDetail, ItemRow } from '@/types';
 
 /** `discountMode` says which of the two discount inputs a row is showing. */
 type FormLine = LineInput & { key: string; discountMode: DiscountMode };
@@ -48,6 +58,22 @@ const blankLine = (): FormLine => ({
   taxRate: '0',
 });
 
+/** What a line picks up from an item, whether chosen from the list or scanned. */
+const itemLinePatch = (item: ItemRow, purchaseSide: boolean): Partial<FormLine> => ({
+  itemId: item.id,
+  itemName: item.name,
+  hsnSac: item.hsnSac ?? '',
+  unit: item.unitShort,
+  // Purchases default to the purchase price, sales to the sale price.
+  pricePerUnit: purchaseSide ? item.purchasePrice : item.salePrice,
+  isTaxInclusive: purchaseSide ? item.purchasePriceTaxInclusive : item.salePriceTaxInclusive,
+  taxRate: item.taxRate,
+  discountMode: 'percent',
+  discountPercent: num(item.discountValue) || '',
+  discountAmount: '',
+  quantity: '1',
+});
+
 /**
  * Entry form for every document type.
  *
@@ -61,12 +87,15 @@ export function TransactionForm({
   source,
   convertId,
   presetPartyId,
+  presetItem,
 }: {
   txnType: TxnType;
   editId?: number;
   source?: TransactionDetail | null;
   convertId?: number;
   presetPartyId?: number;
+  /** Starts the first line on this item — used when billing from a scanned label. */
+  presetItem?: ItemRow | null;
 }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -118,7 +147,9 @@ export function TransactionForm({
           discountAmount: l.discountMode === 'amount' ? l.discountAmount : '',
           taxRate: l.taxRate,
         }))
-      : [blankLine()],
+      : presetItem
+        ? [{ ...blankLine(), ...itemLinePatch(presetItem, isPurchaseSide) }]
+        : [blankLine()],
   );
   const [invoiceDiscountMode, setInvoiceDiscountMode] = useState<DiscountMode>(
     source?.invoiceDiscountMode === 'amount' ? 'amount' : 'percent',
@@ -149,6 +180,9 @@ export function TransactionForm({
   const [partyModalOpen, setPartyModalOpen] = useState(false);
   const [itemModalOpen, setItemModalOpen] = useState(false);
   const [pendingLineKey, setPendingLineKey] = useState<string | null>(null);
+  const [scanText, setScanText] = useState('');
+  const [lastScan, setLastScan] = useState<ScanOutcome | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   /* --------------------------- derived ---------------------------- */
   // Editing keeps the stored number; a new document takes the next free one.
@@ -276,22 +310,46 @@ export function TransactionForm({
   const pickItem = (key: string, itemId: number) => {
     const item = items.find((i) => i.id === itemId);
     if (!item) return;
-    setLine(key, {
-      itemId: item.id,
-      itemName: item.name,
-      hsnSac: item.hsnSac ?? '',
-      unit: item.unitShort,
-      // Purchases default to the purchase price, sales to the sale price.
-      pricePerUnit: isPurchaseSide ? item.purchasePrice : item.salePrice,
-      isTaxInclusive: isPurchaseSide
-        ? item.purchasePriceTaxInclusive
-        : item.salePriceTaxInclusive,
-      taxRate: item.taxRate,
-      discountMode: 'percent',
-      discountPercent: num(item.discountValue) || '',
-      discountAmount: '',
-      quantity: '1',
-    });
+    setLine(key, itemLinePatch(item, isPurchaseSide));
+  };
+
+  // On by default; Settings → Item → Barcode scanning turns the scan bar off.
+  const scanEnabled = !isExpense && bootstrap?.settings?.item_barcode_enabled !== 'false';
+
+  /**
+   * A scanned label (USB scanner, camera or typed code) adds one unit: onto the
+   * line already holding that item, else into the first empty row, else a new row.
+   */
+  const addScanned = (scanned: string): ScanOutcome | undefined => {
+    const code = codeFromScan(scanned);
+    if (!code) return undefined;
+    const item = items.find((i) => sameItemCode(i.itemCode, code));
+    const outcome: ScanOutcome = item
+      ? { ok: true, message: '' }
+      : { ok: false, message: `No active item has the code "${code}"` };
+
+    if (item) {
+      const existing = lines.find((l) => l.itemId === item.id);
+      const qty = existing ? round3(num(existing.quantity) + 1) : 1;
+      outcome.message = `${item.name} × ${qty}`;
+      setLines((ls) => {
+        const same = ls.find((l) => l.itemId === item.id);
+        if (same) {
+          return ls.map((l) =>
+            l.key === same.key ? { ...l, quantity: String(round3(num(l.quantity) + 1)) } : l,
+          );
+        }
+        const empty = ls.find((l) => !l.itemName.trim());
+        const patch = itemLinePatch(item, isPurchaseSide);
+        return empty
+          ? ls.map((l) => (l.key === empty.key ? { ...l, ...patch } : l))
+          : [...ls, { ...blankLine(), ...patch }];
+      });
+      setErrors((e) => ({ ...e, lines: '' }));
+    }
+
+    setLastScan(outcome);
+    return outcome;
   };
 
   const addLine = () => setLines((ls) => [...ls, blankLine()]);
@@ -613,6 +671,43 @@ export function TransactionForm({
           ) : (
             /* Line items */
             <div className="card overflow-hidden">
+              {scanEnabled && (
+                <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2.5">
+                  <ScanLine size={16} className="shrink-0 text-ink-faint" />
+                  <Input
+                    value={scanText}
+                    onChange={(e) => setScanText(e.target.value)}
+                    onKeyDown={(e) => {
+                      // Scanners type the code and press Enter.
+                      if (e.key !== 'Enter') return;
+                      e.preventDefault();
+                      addScanned(scanText);
+                      setScanText('');
+                    }}
+                    placeholder="Scan QR / barcode, or type an item code and press Enter"
+                    aria-label="Scan item"
+                    className="h-8.5 min-w-0 flex-1 sm:max-w-sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon={<Camera size={14} />}
+                    onClick={() => setCameraOpen(true)}
+                  >
+                    Camera
+                  </Button>
+                  {lastScan && (
+                    <span
+                      className={clsx(
+                        'text-[12.5px]',
+                        lastScan.ok ? 'text-success' : 'text-danger',
+                      )}
+                    >
+                      {lastScan.message}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-max text-[13px]">
                   <thead className="bg-canvas text-ink-soft">
@@ -943,6 +1038,15 @@ export function TransactionForm({
             setPartyId(p.id);
             setPartyName(p.name);
           }}
+        />
+      )}
+
+      {cameraOpen && (
+        <CameraScanModal
+          continuous
+          title="Scan items"
+          onClose={() => setCameraOpen(false)}
+          onScan={addScanned}
         />
       )}
 

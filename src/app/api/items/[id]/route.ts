@@ -5,6 +5,7 @@ import { getActiveFirmId } from '@/server/firm';
 import { handler, ok, fail } from '@/server/http';
 import { itemSchema } from '@/lib/validators';
 import { num, round3 } from '@/lib/format';
+import { resolveItemCode } from '@/server/item-code';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,13 +71,15 @@ export const PUT = handler(async (request: Request, { params }: Ctx) => {
   // Editing the opening stock shifts the current quantity by the difference.
   const newOpening = body.type === 'service' ? 0 : num(body.openingStock);
   const stockQty = round3(num(existing.stockQty) - num(existing.openingStock) + newOpening);
+  // Clearing the code gives the item a generated one; printed labels need it.
+  const itemCode = await resolveItemCode(db, firmId, body.itemCode, id);
 
   const [row] = await db
     .update(items)
     .set({
       name: body.name,
       type: body.type,
-      itemCode: body.itemCode ?? null,
+      itemCode,
       hsnSac: body.hsnSac ?? null,
       categoryId: body.categoryId,
       unitId: body.unitId,

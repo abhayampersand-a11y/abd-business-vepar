@@ -114,7 +114,7 @@ export const NAV: NavItem[] = [
       { label: 'Import Items', href: '/utilities/import-items' },
       { label: 'Set Up My Business', href: '/utilities/setup' },
       { label: 'Accountant Access', href: '/utilities/accountant' },
-      { label: 'Barcode Generator', href: '/utilities/barcode' },
+      { label: 'Item QR Labels', href: '/utilities/barcode' },
       { label: 'Update Items In Bulk', href: '/utilities/bulk-update' },
       { label: 'Import From Tally', href: '/utilities/import-tally' },
       { label: 'Import Parties', href: '/utilities/import-parties' },

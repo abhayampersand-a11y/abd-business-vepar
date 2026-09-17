@@ -5,6 +5,7 @@ import { getActiveFirmId } from '@/server/firm';
 import { handler, ok, fail } from '@/server/http';
 import { num } from '@/lib/format';
 import { z } from 'zod';
+import { reserveItemId, resolveItemCode } from '@/server/item-code';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,22 +72,32 @@ export const POST = handler(async (request: Request) => {
       const opening = num(pick(row, 'opening stock', 'stock', 'quantity', 'qty'));
 
       try {
-        await db.insert(items).values({
-          firmId,
-          name,
-          type: /service/i.test(pick(row, 'type')) ? 'service' : 'product',
-          itemCode: pick(row, 'item code', 'code', 'sku') || null,
-          hsnSac: pick(row, 'hsn', 'hsn code', 'sac', 'hsn/sac') || null,
-          unitId: unit?.id ?? null,
-          categoryId: category?.id ?? null,
-          salePrice: String(num(pick(row, 'sale price', 'selling price', 'price'))),
-          purchasePrice: String(num(pick(row, 'purchase price', 'cost price', 'cost'))),
-          taxRate: String(num(pick(row, 'tax rate', 'gst', 'gst rate', 'tax'))),
-          openingStock: String(opening),
-          openingStockPrice: String(num(pick(row, 'opening stock price', 'at price'))),
-          stockQty: String(opening),
-          minStockLevel: String(num(pick(row, 'min stock', 'minimum stock', 'reorder level'))),
-          location: pick(row, 'location', 'rack') || null,
+        await db.transaction(async (tx) => {
+          const id = await reserveItemId(tx);
+          const itemCode = await resolveItemCode(
+            tx,
+            firmId,
+            pick(row, 'item code', 'code', 'sku', 'barcode'),
+            id,
+          );
+          await tx.insert(items).values({
+            id,
+            firmId,
+            name,
+            type: /service/i.test(pick(row, 'type')) ? 'service' : 'product',
+            itemCode,
+            hsnSac: pick(row, 'hsn', 'hsn code', 'sac', 'hsn/sac') || null,
+            unitId: unit?.id ?? null,
+            categoryId: category?.id ?? null,
+            salePrice: String(num(pick(row, 'sale price', 'selling price', 'price'))),
+            purchasePrice: String(num(pick(row, 'purchase price', 'cost price', 'cost'))),
+            taxRate: String(num(pick(row, 'tax rate', 'gst', 'gst rate', 'tax'))),
+            openingStock: String(opening),
+            openingStockPrice: String(num(pick(row, 'opening stock price', 'at price'))),
+            stockQty: String(opening),
+            minStockLevel: String(num(pick(row, 'min stock', 'minimum stock', 'reorder level'))),
+            location: pick(row, 'location', 'rack') || null,
+          });
         });
         imported++;
       } catch (err) {

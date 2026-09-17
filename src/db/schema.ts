@@ -11,7 +11,7 @@ import {
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 /* ------------------------------------------------------------------ *
  * Enums
@@ -161,6 +161,7 @@ export const items = pgTable(
       .references(() => firms.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     type: itemTypeEnum('type').default('product').notNull(),
+    /** Unique per firm, ignoring case; generated (ITM00042) when left blank. The QR label encodes it. */
     itemCode: text('item_code'),
     hsnSac: text('hsn_sac'),
     categoryId: integer('category_id').references(() => itemCategories.id, { onDelete: 'set null' }),
@@ -190,7 +191,12 @@ export const items = pgTable(
     isActive: boolean('is_active').default(true).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index('items_firm_idx').on(t.firmId), index('items_name_idx').on(t.name)],
+  (t) => [
+    index('items_firm_idx').on(t.firmId),
+    index('items_name_idx').on(t.name),
+    // A scanned label must resolve to exactly one item.
+    uniqueIndex('items_firm_code_key').on(t.firmId, sql`lower(item_code)`),
+  ],
 );
 
 /* ------------------------------------------------------------------ *

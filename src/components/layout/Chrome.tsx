@@ -10,7 +10,8 @@ const BARE_ROUTES = new Set(['/login', '/register']);
 export function Chrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  if (BARE_ROUTES.has(pathname)) return <>{children}</>;
+  // /i/<code> is what a phone opens from an item's QR label — a phone-sized page of its own.
+  if (BARE_ROUTES.has(pathname) || pathname.startsWith('/i/')) return <>{children}</>;
 
   return (
     <div className="flex h-screen overflow-hidden">

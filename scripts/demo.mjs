@@ -155,11 +155,22 @@ const ITEMS = [
   ['Steel Filing Cabinet', 'CAB-STL', '9403', 'Office Furniture', 'Pcs', 9500, 7100, 18, 8, 2],
 ];
 
+// Item codes are unique, so a second run (--yes) labels its copies PEN-BLU-2 and so on.
+const takenCodes = new Set(
+  (await call('GET', '/items')).map((i) => (i.itemCode ?? '').toLowerCase()),
+);
+const freeCode = (code) => {
+  let candidate = code;
+  for (let n = 2; takenCodes.has(candidate.toLowerCase()); n++) candidate = `${code}-${n}`;
+  takenCodes.add(candidate.toLowerCase());
+  return candidate;
+};
+
 const item = {};
 for (const [name, code, hsn, cat, unit, sale, purchase, tax, stock, min] of ITEMS) {
   const created = await call('POST', '/items', {
     name,
-    itemCode: code,
+    itemCode: freeCode(code),
     hsnSac: hsn,
     categoryId: catIds[cat],
     unitId: unitId(unit) ?? unitId('Pcs'),

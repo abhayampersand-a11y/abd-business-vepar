@@ -4,6 +4,8 @@
  *   node scripts/db.mjs status   — row counts per table
  *   node scripts/db.mjs reset    — wipe transactions/parties/items, keep the firm setup
  *   node scripts/db.mjs seed     — load a small demo business
+ *   node scripts/db.mjs item-codes — give every item a unique code (run before `db:push`
+ *                                    adds the unique index, if some items share or lack one)
  *
  * `reset` deletes business data. It asks for --yes before doing anything.
  */
@@ -116,7 +118,21 @@ async function seed() {
       ['Wireless Mouse', 'MSE-WL', '8471', 'Electronics', 799, 520, 18, 25, 5],
     ];
 
-    for (const [name, code, hsn, category, sale, purchase, tax, stock, minStock] of demoItems) {
+    // Item codes are unique per firm, so seeding again with --yes suffixes the copies.
+    const { rows: codeRows } = await client.query(
+      `select lower(item_code) as code from items where firm_id = $1 and item_code is not null`,
+      [firmId],
+    );
+    const taken = new Set(codeRows.map((r) => r.code));
+    const freeCode = (code) => {
+      let candidate = code;
+      for (let n = 2; taken.has(candidate.toLowerCase()); n++) candidate = `${code}-${n}`;
+      taken.add(candidate.toLowerCase());
+      return candidate;
+    };
+
+    for (const [name, baseCode, hsn, category, sale, purchase, tax, stock, minStock] of demoItems) {
+      const code = freeCode(baseCode);
       await client.query(
         `insert into items
            (firm_id, name, type, item_code, hsn_sac, category_id, unit_id,
@@ -128,9 +144,9 @@ async function seed() {
     }
 
     await client.query(
-      `insert into items (firm_id, name, type, hsn_sac, unit_id, sale_price, tax_rate)
-       values ($1, 'Annual Maintenance Contract', 'service', '9987', $2, 12000, 18)`,
-      [firmId, pcs],
+      `insert into items (firm_id, name, type, item_code, hsn_sac, unit_id, sale_price, tax_rate)
+       values ($1, 'Annual Maintenance Contract', 'service', $3, '9987', $2, 12000, 18)`,
+      [firmId, pcs, freeCode('SVC-AMC')],
     );
 
     const demoParties = [
@@ -168,12 +184,43 @@ async function seed() {
   }
 }
 
+/**
+ * Mirrors drizzle/0002_item_codes.sql: blank codes become ITM<id>, and later
+ * items sharing a code (ignoring case) get their id appended.
+ */
+async function itemCodes() {
+  const client = await pool.connect();
+  try {
+    await client.query('begin');
+    await client.query(`update items set item_code = null where btrim(item_code) = ''`);
+    await client.query(`update items set item_code = btrim(item_code) where item_code <> btrim(item_code)`);
+    const dupes = await client.query(
+      `update items i set item_code = i.item_code || '-' || i.id
+         from (select id, row_number() over (partition by firm_id, lower(item_code) order by id) as rn
+                 from items where item_code is not null) d
+        where d.id = i.id and d.rn > 1`,
+    );
+    const filled = await client.query(
+      `update items set item_code = 'ITM' || lpad(id::text, greatest(5, length(id::text)), '0')
+        where item_code is null`,
+    );
+    await client.query('commit');
+    console.log(`Generated ${filled.rowCount} codes and renamed ${dupes.rowCount} duplicates.`);
+  } catch (err) {
+    await client.query('rollback');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 try {
   if (command === 'status') await status();
+  else if (command === 'item-codes') await itemCodes();
   else if (command === 'reset') await reset();
   else if (command === 'seed') await seed();
   else {
-    console.log('Usage: node scripts/db.mjs [status|reset|seed] [--yes]');
+    console.log('Usage: node scripts/db.mjs [status|reset|seed|item-codes] [--yes]');
     process.exitCode = 1;
   }
 } catch (err) {

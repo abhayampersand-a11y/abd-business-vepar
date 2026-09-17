@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { NotFoundError } from './txn-service';
 import { requireUser, UnauthorizedError } from './auth';
+import { ItemCodeTakenError } from './item-code';
 
 export const ok = <T>(data: T, init?: ResponseInit) => NextResponse.json(data, init);
 
@@ -41,6 +42,7 @@ export function handler<Args extends unknown[]>(
         });
       }
       if (err instanceof NotFoundError) return fail(err.message, 404);
+      if (err instanceof ItemCodeTakenError) return fail(err.message, 409);
 
       const message = err instanceof Error ? err.message : 'Unexpected server error';
       if (/duplicate key/i.test(message)) {
