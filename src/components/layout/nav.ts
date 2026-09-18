@@ -37,7 +37,7 @@ export const NAV: NavItem[] = [
     children: [
       { label: 'Party Details', href: '/parties', quickAdd: '/parties?new=1' },
       { label: 'Whatsapp Connect', href: '/parties/whatsapp' },
-      { label: 'Vyapar Network', href: '/parties/network' },
+      { label: 'Dhandho Network', href: '/parties/network' },
     ],
   },
   { label: 'Items', href: '/items', icon: ShoppingBag, quickAdd: '/items?new=1' },
@@ -60,7 +60,7 @@ export const NAV: NavItem[] = [
         href: '/sale/credit-notes',
         quickAdd: '/txn/new/credit_note',
       },
-      { label: 'Vyapar POS', href: '/sale/pos' },
+      { label: 'Dhandho POS', href: '/sale/pos' },
     ],
   },
   {

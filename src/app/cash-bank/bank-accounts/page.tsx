@@ -113,14 +113,14 @@ function BankAccountsScreen() {
   if (!accounts.length) {
     return (
       <div className="flex h-full flex-col">
-        <div className="border-b border-line bg-white px-5 py-3">
+        <div className="border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
           <h1 className="text-lg font-semibold text-ink">Banks</h1>
         </div>
         <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
           <div>
             <h2 className="text-xl font-semibold text-ink">Manage Multiple Bank Accounts</h2>
             <p className="mt-1.5 text-[13.5px] text-ink-soft">
-              With Vyapar you can manage multiple banks and payment types like UPI, Net Banking and
+              With Dhandho you can manage multiple banks and payment types like UPI, Net Banking and
               Credit Card
             </p>
           </div>
@@ -173,7 +173,7 @@ function BankAccountsScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-line bg-white px-5 py-3">
+      <div className="flex items-center justify-between border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <h1 className="text-lg font-semibold text-ink">Banks</h1>
         <Button
           icon={<Plus size={16} />}
@@ -187,7 +187,7 @@ function BankAccountsScreen() {
       </div>
 
       <div className="grid min-h-0 flex-1 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <div className="min-h-0 overflow-y-auto border-r border-line bg-white p-3">
+        <div className="min-h-0 overflow-y-auto border-r border-white/60 bg-white/40 p-3">
           {accounts.map((a) => (
             <button
               key={a.id}

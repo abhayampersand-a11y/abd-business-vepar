@@ -54,7 +54,7 @@ export function DateRangeFilter({
   const { key, from, to, set } = useDateRange(scope, fallback);
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 border-b border-line bg-white px-5 py-2.5">
+    <div className="flex flex-wrap items-center gap-2.5 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-2.5">
       <span className="text-[13px] font-medium text-ink-soft">Filter by :</span>
 
       <Select

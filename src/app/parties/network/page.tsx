@@ -7,8 +7,8 @@ export default function Page() {
   return (
     <FeaturePage
       icon={Network}
-      title={"Vyapar Network"}
-      subtitle={"Discover verified suppliers and distributors already billing on Vyapar, and let them find you."}
+      title={"Dhandho Network"}
+      subtitle={"Discover verified suppliers and distributors already billing on Dhandho, and let them find you."}
       features={[
         { title: "Verified businesses", body: "Every listing is tied to a GSTIN-verified account." },
         { title: "One-tap enquiries", body: "Send a purchase enquiry without re-keying your details." },

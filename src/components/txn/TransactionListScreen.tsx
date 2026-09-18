@@ -284,7 +284,7 @@ export function TransactionListScreen({
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <h1 className="text-lg font-semibold text-ink">{title}</h1>
         <div className="flex items-center gap-2">
           <Link href={`/txn/new/${types[0]}`}>
@@ -342,7 +342,7 @@ export function TransactionListScreen({
       />
 
       {showSearch && (
-        <div className="border-b border-line bg-white px-5 py-2.5">
+        <div className="border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-2.5">
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -354,7 +354,7 @@ export function TransactionListScreen({
 
       {/* Summary strip */}
       {!isOpenDoc && (
-        <div className="border-b border-line bg-white px-5 py-3.5">
+        <div className="border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3.5">
           <div className="card inline-flex min-w-72 flex-col p-4">
             <p className="text-[13px] text-ink-soft">
               {isPayment ? 'Total Amount' : `Total ${primary.label} Amount`}

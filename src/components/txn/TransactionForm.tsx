@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, ArrowLeft, Save, Camera, ScanLine } from 'lucide-react';
+import { Plus, X, ArrowLeft, Save, Camera, ScanLine, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import {
   useGetPartiesQuery,
@@ -151,8 +151,11 @@ export function TransactionForm({
         ? [{ ...blankLine(), ...itemLinePatch(presetItem, isPurchaseSide) }]
         : [blankLine()],
   );
+  // A new bill's discount starts in rupees; a saved one reopens in the mode it was typed in.
   const [invoiceDiscountMode, setInvoiceDiscountMode] = useState<DiscountMode>(
-    source?.invoiceDiscountMode === 'amount' ? 'amount' : 'percent',
+    source && num(source.invoiceDiscountValue) > 0 && source.invoiceDiscountMode === 'percent'
+      ? 'percent'
+      : 'amount',
   );
   const [invoiceDiscountValue, setInvoiceDiscountValue] = useState(() =>
     source && num(source.invoiceDiscountValue) > 0 ? String(num(source.invoiceDiscountValue)) : '',
@@ -449,7 +452,7 @@ export function TransactionForm({
     setLines([blankLine()]);
     setReceivedAmount('');
     setPaymentAmount('');
-    setInvoiceDiscountMode('percent');
+    setInvoiceDiscountMode('amount');
     setInvoiceDiscountValue('');
     setAdditionalCharges('');
     setDescription('');
@@ -464,7 +467,7 @@ export function TransactionForm({
   return (
     <div className="flex h-full flex-col bg-canvas">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-line bg-white px-5 py-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <button
           onClick={() => router.back()}
           className="rounded-full p-1.5 text-ink-soft transition hover:bg-canvas"
@@ -802,7 +805,7 @@ export function TransactionForm({
                                 onChange={(e) => setLineDiscount(line, e.target.value)}
                                 className="h-8.5 text-right"
                               />
-                              <DiscountModeToggle
+                              <DiscountModeSelect
                                 mode={line.discountMode}
                                 onChange={(m) => setLineDiscountMode(line, computed, m)}
                                 className="h-8.5"
@@ -924,7 +927,7 @@ export function TransactionForm({
                       placeholder="0"
                       className="h-8 w-16 text-right"
                     />
-                    <DiscountModeToggle
+                    <DiscountModeSelect
                       mode={invoiceDiscountMode}
                       onChange={changeInvoiceDiscountMode}
                     />
@@ -1073,8 +1076,8 @@ export function TransactionForm({
   );
 }
 
-/** The % / rupee switch that sits beside every discount box. */
-function DiscountModeToggle({
+/** The % / rupee dropdown that sits beside every discount box. */
+function DiscountModeSelect({
   mode,
   onChange,
   className,
@@ -1084,27 +1087,24 @@ function DiscountModeToggle({
   className?: string;
 }) {
   return (
-    <div
-      className={clsx(
-        'inline-flex h-8 shrink-0 overflow-hidden rounded-lg border border-line-strong bg-white',
-        className,
-      )}
-    >
-      {(['percent', 'amount'] as const).map((m) => (
-        <button
-          key={m}
-          type="button"
-          aria-pressed={mode === m}
-          aria-label={m === 'percent' ? 'Discount in percent' : 'Discount in rupees'}
-          onClick={() => onChange(m)}
-          className={clsx(
-            'h-full w-6.5 text-[12px] font-medium transition-colors',
-            mode === m ? 'bg-accent text-white' : 'text-ink-faint hover:bg-canvas',
-          )}
-        >
-          {m === 'percent' ? '%' : '₹'}
-        </button>
-      ))}
+    <div className="relative shrink-0">
+      <select
+        value={mode}
+        onChange={(e) => onChange(e.target.value === 'amount' ? 'amount' : 'percent')}
+        aria-label="Discount type"
+        className={clsx(
+          'h-8 w-12 appearance-none rounded-lg border border-line-strong bg-white pl-2 pr-4 text-[12.5px] font-medium text-ink transition',
+          'focus:border-accent focus:outline-none focus:ring-3 focus:ring-accent/15',
+          className,
+        )}
+      >
+        <option value="percent">%</option>
+        <option value="amount">₹</option>
+      </select>
+      <ChevronDown
+        size={12}
+        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-ink-faint"
+      />
     </div>
   );
 }

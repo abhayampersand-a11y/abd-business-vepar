@@ -1,4 +1,4 @@
-# Vyapar — Business Accounting & Billing
+# Dhandho — Business Accounting & Billing
 
 A Vyapar-style billing, inventory and accounting app for small Indian businesses, built with
 Next.js, Neon Postgres, Drizzle ORM and Redux Toolkit.

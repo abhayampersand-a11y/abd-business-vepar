@@ -77,7 +77,7 @@ function ReportScreen({ slug }: { slug: string }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <h1 className="text-lg font-semibold text-ink">{title}</h1>
         <div className="no-print flex items-center gap-2">
           {needsParty && (

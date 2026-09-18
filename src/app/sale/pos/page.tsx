@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <FeaturePage
       icon={Monitor}
-      title={"Vyapar POS"}
+      title={"Dhandho POS"}
       subtitle={"A billing counter built for speed — scan, bill and take payment in a few seconds."}
       features={[
         { title: "Barcode-first billing", body: "Scan an item and it lands on the bill priced and taxed." },

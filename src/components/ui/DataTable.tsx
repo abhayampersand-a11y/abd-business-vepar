@@ -99,13 +99,13 @@ export function DataTable<T>({
 
   if (!rows.length && empty) return <>{empty}</>;
 
-  const pad = dense ? 'px-3 py-2' : 'px-4 py-3';
+  const pad = dense ? 'px-3.5 py-2.5' : 'px-5 py-3.5';
 
   return (
     <div className="w-full overflow-x-auto">
       <table className="w-full min-w-max border-collapse text-[13px]">
         <thead className={clsx(stickyHeader && 'sticky top-0 z-10')}>
-          <tr className="bg-canvas/90 backdrop-blur">
+          <tr className="bg-white/85 backdrop-blur">
             {columns.map((col) => {
               const isSorted = sort?.key === col.key;
               return (
@@ -113,8 +113,8 @@ export function DataTable<T>({
                   key={col.key}
                   style={{ width: col.width }}
                   className={clsx(
-                    'border-b border-line font-semibold text-ink-soft select-none',
-                    pad,
+                    'select-none border-b border-line text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-faint',
+                    dense ? 'px-3.5 py-2.5' : 'px-5 py-3',
                     col.align === 'right'
                       ? 'text-right'
                       : col.align === 'center'
@@ -167,7 +167,7 @@ export function DataTable<T>({
                               className="fixed inset-0 z-20"
                               onClick={() => setOpenFilter(null)}
                             />
-                            <div className="absolute left-0 z-30 mt-1 max-h-64 w-52 overflow-y-auto rounded-lg border border-line bg-white p-2 text-left shadow-lg">
+                            <div className="absolute left-0 z-30 mt-1 max-h-64 w-52 overflow-y-auto rounded-2xl border border-line bg-white p-2 text-left shadow-xl">
                               <button
                                 className="mb-1 w-full rounded px-2 py-1 text-left text-[12px] text-accent hover:bg-canvas"
                                 onClick={() =>
@@ -210,9 +210,9 @@ export function DataTable<T>({
                 key={key}
                 onClick={() => onRowClick?.(row)}
                 className={clsx(
-                  'border-b border-line transition-colors',
+                  'border-b border-line/60 transition-colors last:border-0',
                   onRowClick && 'cursor-pointer',
-                  selectedKey === key ? 'bg-accent-soft' : 'bg-white hover:bg-canvas/70',
+                  selectedKey === key ? 'bg-gold-soft' : 'hover:bg-gold-soft/45',
                 )}
               >
                 {columns.map((col) => (
@@ -239,7 +239,7 @@ export function DataTable<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-10 text-center text-[13px] text-ink-faint"
+                className="px-5 py-12 text-center text-[13px] text-ink-faint"
               >
                 No rows match the current filters.
               </td>
@@ -248,7 +248,7 @@ export function DataTable<T>({
         </tbody>
 
         {footer && (
-          <tfoot className="sticky bottom-0 bg-canvas">
+          <tfoot className="sticky bottom-0 bg-white/90 backdrop-blur">
             <tr>
               <td colSpan={columns.length} className="border-t border-line px-4 py-2.5">
                 {footer}

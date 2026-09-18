@@ -53,7 +53,7 @@ function CashScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-3 border-b border-line bg-white px-5 py-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <h1 className="flex items-center gap-2 text-lg font-semibold text-ink">
           <Wallet size={19} className="text-accent" />
           Cash In Hand

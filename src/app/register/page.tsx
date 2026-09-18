@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { AuthCard } from '@/components/auth/AuthCard';
 
-export const metadata = { title: 'Create account — Vyapar' };
+export const metadata = { title: 'Create account — Dhandho' };
 
 export default function RegisterPage() {
   return (

@@ -5,6 +5,9 @@ import { formatAmountShort, parseISODate } from '@/lib/format';
 
 type Point = { date: string; total: number };
 
+/** The chart's one colour: the same warm gold as the ambient light. */
+const GOLD = '#e0a91b';
+
 /**
  * Small dependency-free area chart. The dashboard only ever plots one series,
  * so a hand-rolled SVG beats pulling in a charting library.
@@ -75,9 +78,13 @@ export function SalesChart({
       >
         <defs>
           <linearGradient id="saleFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity="0.02" />
+            <stop offset="0%" stopColor={GOLD} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={GOLD} stopOpacity="0" />
           </linearGradient>
+          {/* A faint halo under the line so it reads as lit, not drawn. */}
+          <filter id="saleGlow" x="-10%" y="-40%" width="120%" height="180%">
+            <feGaussianBlur stdDeviation="3.5" />
+          </filter>
         </defs>
 
         {gridValues.map((v, i) => (
@@ -87,8 +94,9 @@ export function SalesChart({
               x2={width - padX}
               y1={y(v)}
               y2={y(v)}
-              stroke="var(--color-line)"
+              stroke="rgb(28 27 24 / 0.07)"
               strokeWidth="1"
+              strokeDasharray={i === 0 ? undefined : '3 5'}
             />
             <text
               x={padX - 8}
@@ -108,7 +116,15 @@ export function SalesChart({
             <path
               d={linePath}
               fill="none"
-              stroke="var(--color-accent)"
+              stroke={GOLD}
+              strokeOpacity="0.45"
+              strokeWidth="6"
+              filter="url(#saleGlow)"
+            />
+            <path
+              d={linePath}
+              fill="none"
+              stroke={GOLD}
               strokeWidth="2"
               strokeLinejoin="round"
               strokeLinecap="round"
@@ -118,7 +134,7 @@ export function SalesChart({
 
         {series.map((p, i) =>
           p.total > 0 ? (
-            <circle key={i} cx={x(i)} cy={y(p.total)} r="3" fill="var(--color-accent)" />
+            <circle key={i} cx={x(i)} cy={y(p.total)} r="3.5" fill={GOLD} stroke="#fff" strokeWidth="1.5" />
           ) : null,
         )}
 
@@ -156,7 +172,8 @@ export function SalesChart({
             x2={x(hover)}
             y1={padY}
             y2={padY + innerH}
-            stroke="var(--color-accent)"
+            stroke={GOLD}
+            strokeOpacity="0.6"
             strokeWidth="1"
             strokeDasharray="3 3"
           />
@@ -165,11 +182,14 @@ export function SalesChart({
 
       {hover !== null && series[hover] && (
         <div
-          className="pointer-events-none absolute -translate-x-1/2 rounded-md bg-ink px-2.5 py-1.5 text-[11.5px] whitespace-nowrap text-white shadow-lg"
+          className="pointer-events-none absolute -translate-x-1/2 rounded-xl bg-white/90 px-3 py-2 text-[11.5px] whitespace-nowrap text-ink shadow-[0_12px_28px_-14px_rgb(60_48_20/0.45)] ring-1 ring-white backdrop-blur"
           style={{ left: `${(x(hover) / width) * 100}%`, top: 4 }}
         >
-          <div className="font-medium">{formatTick(series[hover].date)}</div>
-          <div>{formatAmountShort(series[hover].total)}</div>
+          <div className="text-ink-faint">{formatTick(series[hover].date)}</div>
+          <div className="mt-0.5 flex items-center gap-1.5 font-medium">
+            <span className="h-2 w-2 rounded-full" style={{ background: GOLD }} />
+            Sales: {formatAmountShort(series[hover].total)}
+          </div>
         </div>
       )}
     </div>

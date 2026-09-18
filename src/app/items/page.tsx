@@ -265,7 +265,7 @@ function ItemsScreen() {
       ) : (
         <div className="grid min-h-0 flex-1 lg:grid-cols-[340px_minmax(0,1fr)]">
           {/* Item list */}
-          <div className="flex min-h-0 flex-col border-r border-line bg-white">
+          <div className="flex min-h-0 flex-col border-r border-white/60 bg-white/40">
             <div className="flex items-center gap-2 p-3">
               {showSearch ? (
                 <SearchInput
@@ -378,7 +378,7 @@ function ItemsScreen() {
           </div>
 
           {/* Item detail */}
-          <div className="min-h-0 overflow-y-auto bg-canvas">
+          <div className="min-h-0 overflow-y-auto">
             {!selected ? (
               <EmptyState
                 icon={<Package size={28} />}

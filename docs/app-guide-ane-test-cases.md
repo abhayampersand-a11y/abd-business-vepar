@@ -1,4 +1,4 @@
-# વ્યાપાર એપ — સંપૂર્ણ માર્ગદર્શિકા અને ટેસ્ટ કેસ
+# ધંધો એપ — સંપૂર્ણ માર્ગદર્શિકા અને ટેસ્ટ કેસ
 
 > **આ દસ્તાવેજ કોના માટે:** એપ વાપરનાર, ટેસ્ટ કરનાર અને નવું કામ કરનાર ડેવલપર.
 > **શું છે:** શરૂઆતથી દરેક સ્ક્રીન, દરેક બટન દબાવવાથી શું થાય, એની અસર ક્યાં ક્યાં દેખાય, બધા ટેસ્ટ કેસ, અને કોડમાં મળેલી જાણીતી ખામીઓ.
@@ -184,7 +184,9 @@
 | --- | --- | --- |
 | **Total Receivable** | જે પાર્ટીનું બેલેન્સ વત્તા છે એનો સરવાળો | Reports → All parties |
 | **Total Payable** | જે પાર્ટીનું બેલેન્સ ઓછા છે એનો સરવાળો (વત્તામાં દેખાય) | Reports → All parties |
-| **Total Sale** + ગ્રાફ | પસંદ કરેલા સમયનાં Sale Invoice નો ટોટલ; બિલની સંખ્યા; એટલા જ લાંબા પાછલા સમય સામે % ફેર | — |
+| ઉપર જમણે Invoices / Open orders / Low stock | પસંદ કરેલા સમયનાં Sale Invoice ની સંખ્યા; Open સ્ટેટસવાળા ઓર્ડર; ઓછા સ્ટોકવાળી આઇટમ | — |
+| **Total Sale** (ઉપરની હારનું કાર્ડ) | પસંદ કરેલા સમયનાં Sale Invoice નો ટોટલ + પાછલા સમય સામે % | Reports → Sale |
+| **Sales Overview** + ગ્રાફ | પસંદ કરેલા સમયનાં Sale Invoice નો ટોટલ; બિલની સંખ્યા; એટલા જ લાંબા પાછલા સમય સામે % ફેર | — |
 | સમયગાળો (ડ્રોપડાઉન) | Today … All Time. ફક્ત Total Sale અને ગ્રાફ બદલાય, બીજાં ખાનાં નહીં | — |
 | ↻ Refresh | બધા આંકડા ફરી લાવે | — |
 | **Cash In Hand** | [વિભાગ ૧](#1) મુજબ | Cash In Hand |
@@ -512,7 +514,7 @@
 | ITEM | ટાઇપ → Active આઇટમની યાદી (કોડ, ભાવ, સ્ટોક). પસંદ કરો → HSN, Unit, ભાવ (સેલ બાજુ Sale Price, પરચેઝ/ઓર્ડર/ડેબિટ નોટ બાજુ Purchase Price), incl. tax ટિક, GST, ડિફોલ્ટ ડિસ્કાઉન્ટ, qty 1 ભરાય. *Add new item* → આઇટમ ફોર્મ. યાદી બહારનું નામ પણ ચાલે (પણ સ્ટોક પર અસર નહીં). |
 | HSN, QTY, UNIT, PRICE/UNIT | બદલી શકાય |
 | *incl. tax* | ભાવમાં ટેક્સ સામેલ |
-| DISCOUNT + **% / ₹** | જે લખ્યું એ સાચું; બીજું નીચે નાના અક્ષરે. મોડ બદલતાં રકમ બદલાતી નથી. |
+| DISCOUNT + **% / ₹ ડ્રોપડાઉન** | નવી લાઇનમાં ડિફોલ્ટ **%**. જે લખ્યું એ સાચું; બીજું નીચે નાના અક્ષરે. ડ્રોપડાઉનમાં મોડ બદલતાં રકમ બદલાતી નથી. |
 | TAX | GST દર |
 | AMOUNT | ટેક્સ સાથે |
 | ✕ | લાઇન કાઢે (છેલ્લી હોય તો ખાલી થાય) |
@@ -537,6 +539,7 @@
 | ખાનું | નિયમ |
 | --- | --- |
 | Description | છાપેલા બિલમાં આવે |
+| Discount (જમણે, Subtotal નીચે) + **₹ / % ડ્રોપડાઉન** | બિલ પરનું ડિસ્કાઉન્ટ. નવા બિલમાં ડિફોલ્ટ **₹**; સેવ થયેલું બિલ ખોલો તો જે મોડમાં લખ્યું હતું એ જ. મોડ બદલતાં રકમ બદલાતી નથી (આંકડો નવા મોડમાં ફેરવાય). |
 | Payment Type | Cash, Cheque, Bank Account, UPI, Card, NEFT/RTGS. **Cash સિવાય** બાજુમાં *Bank Account* પસંદ કરવાનું ખાનું. |
 | રકમ શબ્દોમાં | ટોટલ 0 થી વધુ હોય ત્યારે |
 | *Received* (સેલ બાજુ) / *Paid* (પરચેઝ, Expense) | — |
@@ -626,7 +629,7 @@ Payment દસ્તાવેજમાં ટેબલને બદલે *Payme
 | Sale Order | સ્ટેટસ ફિલ્ટર; Convert | ચુકવણી નથી | કંઈ નહીં; ડેશબોર્ડ Open Orders +1 |
 | Delivery Challan | Convert | ચુકવણી નથી | કંઈ નહીં (**સ્ટોક પણ નહીં**) |
 | Sale Return/ Credit Note | સ્ટેટસ ફિલ્ટર | ફોર્મમાં *Received* લખ્યું હોય, પણ એ **પાછી આપેલી** રકમ છે | પાર્ટી −, સ્ટોક +, રોકડ − |
-| Vyapar POS | માહિતી પેજ | — | — |
+| Dhandho POS | માહિતી પેજ | — | — |
 
 ---
 
@@ -848,7 +851,7 @@ Payment દસ્તાવેજમાં ટેબલને બદલે *Payme
 ## ૧૮. હજી ન બનેલી (ફક્ત માહિતીવાળી) સ્ક્રીન
 
 આ પેજ પર ફક્ત સુવિધાનું વર્ણન અને બીજે જવાનું બટન છે — કોઈ ડેટા નથી બદલાતો:
-WhatsApp Connect, Vyapar Network, Vyapar POS, Grow Your Business, Auto Backup / Backup to Computer, Restore Backup, Accountant Access, Update Items In Bulk, Import From Tally, Exports To Tally, Track Your Salesmen.
+WhatsApp Connect, Dhandho Network, Dhandho POS, Grow Your Business, Auto Backup / Backup to Computer, Restore Backup, Accountant Access, Update Items In Bulk, Import From Tally, Exports To Tally, Track Your Salesmen.
 
 ---
 
@@ -1116,10 +1119,12 @@ WhatsApp Connect, Vyapar Network, Vyapar POS, Grow Your Business, Auto Backup / 
 | CALC-03 | qty 4 @100, 10%, 5% | 360 / 18 / 378 |
 | CALC-04 | qty 4 @100, Discount **₹50**, 5%, Round Off ટિક | Taxable 350, Tax 17.50, Round Off +0.50, Total **368** |
 | CALC-05 | CALC-04 માં ₹ → % | 12.5 દેખાય; Total એ જ |
-| CALC-06 | qty 2 @250, 18%, બિલ Discount **10%**, Round Off ટિક | Subtotal 500, Discount 50, Tax **81**, Total **531** |
+| CALC-06 | qty 2 @250, 18%, બિલ Discount ડ્રોપડાઉનમાં **%** પસંદ કરી **10**, Round Off ટિક | Subtotal 500, Discount 50, Tax **81**, Total **531** |
 | CALC-07 | qty 1 @99.50, 0%, Round Off ટિક | Round Off +0.50, Total 100 |
 | CALC-08 | CALC-01 + Additional Charges 20 | Total 610 (ટેક્સ 90 જ) |
 | CALC-09 | Discount ₹1,000 (Gross 500) | Discount 500 સુધી; Total 0 |
+| CALC-15 | નવું Sale બિલ ખોલો | લાઇન Discount ડ્રોપડાઉન **%** પર; બિલ Discount ડ્રોપડાઉન **₹** પર |
+| CALC-16 | બિલ Discount **10%** સાથે સેવ → Edit | બિલ Discount ડ્રોપડાઉન **%** પર, 10 ભરેલું |
 | CALC-10 | Total 590, Received 1,000 → Save | Received 590, Balance 0, **Paid** |
 | CALC-11 | qty 0 → Save | *Every line needs a quantity* |
 | CALC-12 | લાઇન નહીં → Save | *Add at least one item* |
@@ -1330,5 +1335,10 @@ WhatsApp Connect, Vyapar Network, Vyapar POS, Grow Your Business, Auto Backup / 
 | તારીખ | ફેરફાર | દસ્તાવેજમાં ક્યાં |
 | --- | --- | --- |
 | 2026-09-17 | દસ્તાવેજ શરૂ: આખી એપનું વર્ણન, અસરનું કોષ્ટક, ટેસ્ટ કેસ, 25 જાણીતી ખામીઓ (કોડ વાંચીને) | બધા વિભાગ |
+| 2026-09-18 | **ડિસ્કાઉન્ટ માટે ડ્રોપડાઉન:** લાઇન અને બિલ ડિસ્કાઉન્ટ બાજુનાં % / ₹ બટનને બદલે હવે ડ્રોપડાઉન. લાઇન ડિસ્કાઉન્ટ ડિફોલ્ટ **%**, બિલ (Subtotal નીચેનું) ડિસ્કાઉન્ટ ડિફોલ્ટ **₹** (પહેલાં %). હિસાબ બદલાયો નથી. | વિભાગ ૯ (આઇટમ લાઇન, ચુકવણી અને સરવાળો); ટેસ્ટ CALC-06, CALC-15, CALC-16 |
+| 2026-09-18 | **ડેશબોર્ડ પ્રીમિયમ દેખાવ:** આખી એપ પાછળ એક જ ગરમ પ્રકાશ — ડાબે હળવો ઠંડો, જમણે ઉપરથી પીળો; મોટું સફેદ કન્ટેનર કાઢ્યું, હવે કાર્ડ સીધાં પ્રકાશિત બેકગ્રાઉન્ડ પર. કાર્ડ અર્ધપારદર્શક કાચ જેવાં, પાતળી ચમકતી કિનારી અને બહુ હળવો પડછાયો. સાઇડબારમાં ઉપર *Dhandho* નામ; ચાલુ મેનુ કાળી પિલ, પીળો આઇકન અને આછી ચમક. ડેશબોર્ડની ગોઠવણ: ઉપર શુભેચ્છા + Invoices / Open orders / Low stock (આઇકન સાથે); પછી Total Receivable, Total Payable, Total Sale ના ત્રણ કાર્ડ; પછી *Sales Overview* ચાર્ટ (સોનેરી લાઇન, હળવી ચમક, ટપકાંવાળી ગ્રિડ, સફેદ tooltip *Sales: ₹…*) અને જમણે કાળું WhatsApp કાર્ડ (લીલું આઇકન, *Connect →*), Open Orders; પછી Cash In Hand, Bank Balance, Stock Value; છેલ્લે Most Used Reports (આઇકન સાથે, *View All →*). **બધા આંકડા, લિંક અને બટન એ જ — ફક્ત દેખાવ અને ગોઠવણ.** | વિભાગ ૪, ૫ |
+| 2026-09-18 | **પેજના પટ્ટા પણ કાચ જેવા:** ઉપરની પટ્ટી, *Filter by* ની પટ્ટી, ટેબ (Products/Services/Category/Units), ડાબી યાદીની કોલમ અને જમણી વિગતની જગ્યા — બધાં હવે અર્ધપારદર્શક અને ધૂંધળાં, એટલે પાછળનો રંગ દેખાય. ચાલુ ટેબ નીચે પીળી લીટી. | વિભાગ ૪, ૬, ૭, ૧૦ |
+| 2026-09-18 | **યાદી (ટેબલ) નો નવો દેખાવ:** કોલમનાં નામ નાનાં કેપિટલ અક્ષરે, લાઇનો પહોળી અને હળવી, પસંદ કરેલી લાઇન પીળી, સ્ટેટસ પિલમાં પાતળી કિનારી, અને Parties ની યાદીમાં નામ આગળ પહેલા અક્ષરનું ગોળ ચિહ્ન. કોઈ કોલમ, ફિલ્ટર કે ક્રમ બદલાયો નથી. | વિભાગ ૬, ૧૦ |
+| 2026-09-18 | **નવો દેખાવ અને નવું નામ:** એપનું નામ **ધંધો (Dhandho)** થયું — ટાઇટલ, સાઇડબારનાં *Dhandho POS* / *Dhandho Network* અને માહિતી પેજનું લખાણ. દેખાવ બદલાયો: ક્રીમ રંગનું બેકગ્રાઉન્ડ, પાછળ ધૂંધળા રંગનાં વાદળ, કાચ જેવી (અર્ધપારદર્શક) સાઇડબાર-ટોપબાર-પેનલ, ગોળ ખૂણાવાળાં કાર્ડ, કાળી પિલવાળું *Add Sale* અને પીળું *Add Purchase*, સાઇડબારમાં ચાલુ મેનુ કાળી પિલમાં, ડેશબોર્ડ પર ઉપર બિઝનેસનું નામ અને Invoices / Open orders / Low stock ના મોટા આંકડા, પીળી છાંટવાળું Total Sale કાર્ડ અને કાળું WhatsApp કાર્ડ. **કોઈ પણ હિસાબ, બટનનું કામ કે સ્ક્રીનની ગોઠવણ બદલાઈ નથી — ફક્ત રંગ-રૂપ.** | વિભાગ ૪, ૫; બધા સ્ક્રીનશોટ |
 | 2026-09-17 | **લેબલ પ્રિન્ટ — પ્રિન્ટર મુજબ:** 16 તૈયાર stock (thermal roll 1/2/3 across, receipt 58/80 mm, A4 Avery sheets) + Custom માપ; લેબલ માપ મુજબ QR ઉપર/ડાબે આપોઆપ; QR ખાનાં પ્રિન્ટરનાં ટપકાં (203/300 dpi) મુજબ; Link / Code only QR; Error correction; Move right/down; Skip used labels; outlines; સાચા mm નું preview; ચેતવણીઓ; છુપા ફ્રેમથી પ્રિન્ટ (પોપ-અપ નહીં); alignment test પેજ; TSPL/ZPL ફાઇલ; પસંદગી બિઝનેસ settings માં. QR મોડલ હવે ફક્ત Download + *Print Labels…* (સીધું Item QR Labels પર). | વિભાગ ૮; ટેસ્ટ QR-08…QR-16, ૨૦.૭-ક (LBL-01…35) |
 | 2026-09-17 | **આઇટમ કોડ અને QR લેબલ:** દરેક આઇટમનો અનોખો કોડ (ખાલી → `ITM00042`), QR મોડલ (Download/Print), Utilities → Item QR Labels, ફોન માટે `/i/<code>` પેજ (Sell/Purchase/Adjust), બિલ ફોર્મમાં સ્કેન પટ્ટી + કેમેરા, Settings → QR / barcode scanning ડિફોલ્ટ ચાલુ, Import માં કોડ નિયમ, `npm run db:item-codes` | વિભાગ ૭, ૮, ૯, ૧૬, ૧૭; ટેસ્ટ ૨૦.૭ |

@@ -8,7 +8,7 @@ export default function Page() {
     <FeaturePage
       icon={CloudDownload}
       title={"Restore Data"}
-      subtitle={"Bring data back in from a backup file or another Vyapar company."}
+      subtitle={"Bring data back in from a backup file or another Dhandho company."}
       features={[
         { title: "CSV restore", body: "Re-import items and parties from any spreadsheet you exported." },
         { title: "Merge or replace", body: "Choose whether to add to what is here or start clean." },

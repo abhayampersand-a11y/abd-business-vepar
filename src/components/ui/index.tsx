@@ -281,16 +281,16 @@ export function Badge({
   children: ReactNode;
 }) {
   const tones = {
-    neutral: 'bg-canvas text-ink-soft',
-    success: 'bg-success-soft text-success',
-    warning: 'bg-warning-soft text-warning',
-    danger: 'bg-danger-soft text-danger',
-    accent: 'bg-accent-soft text-accent',
+    neutral: 'bg-canvas text-ink-soft ring-line',
+    success: 'bg-success-soft text-success ring-success/15',
+    warning: 'bg-warning-soft text-warning ring-warning/20',
+    danger: 'bg-danger-soft text-danger ring-danger/15',
+    accent: 'bg-accent-soft text-ink ring-gold/40',
   };
   return (
     <span
       className={clsx(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-[11.5px] font-medium',
+        'inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-medium ring-1 ring-inset',
         tones[tone],
       )}
     >
@@ -462,7 +462,7 @@ export function Tabs({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex border-b border-line bg-white">
+    <div className="flex border-b border-white/60 bg-white/45 backdrop-blur-sm">
       {tabs.map((t) => (
         <button
           key={t.id}
@@ -470,7 +470,7 @@ export function Tabs({
           className={clsx(
             'flex-1 border-b-2 px-4 py-3 text-[13px] font-semibold tracking-wide uppercase transition',
             active === t.id
-              ? 'border-accent text-accent'
+              ? 'border-gold text-ink'
               : 'border-transparent text-ink-faint hover:text-ink-soft',
           )}
         >

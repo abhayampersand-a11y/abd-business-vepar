@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui';
 export default function ReportsLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-full min-h-0">
-      <Suspense fallback={<div className="w-56 border-r border-line bg-white" />}>
+      <Suspense fallback={<div className="w-56 border-r border-white/60 bg-white/40" />}>
         <ReportsNav />
       </Suspense>
       <div className="min-w-0 flex-1 overflow-y-auto">
@@ -26,7 +26,7 @@ function ReportsNav() {
   const currentType = params.get('type');
 
   return (
-    <nav className="w-56 shrink-0 overflow-y-auto border-r border-line bg-white py-2">
+    <nav className="w-56 shrink-0 overflow-y-auto border-r border-white/60 bg-white/40 py-2">
       {REPORT_GROUPS.map((group) => (
         <div key={group.title} className="mb-1">
           <p className="px-4 py-2 text-[11.5px] font-medium text-ink-faint">{group.title}</p>

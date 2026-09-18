@@ -37,19 +37,19 @@ export function Topbar() {
   }
 
   return (
-    <header className="no-print flex h-14 shrink-0 items-center gap-3 border-b border-line bg-white px-5">
+    <header className="glass no-print flex h-16 shrink-0 items-center gap-3 rounded-[26px] px-5">
       <Link
         href="/settings/profile"
-        className="flex items-center gap-2 text-[15px] font-medium text-ink-soft transition hover:text-ink"
+        className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[15px] font-medium text-ink transition hover:bg-white/70"
       >
-        <Circle size={8} className="fill-brand text-brand" />
+        <Circle size={8} className="fill-gold text-gold" />
         {needsSetup ? 'Enter Business Name' : firmName}
       </Link>
 
       <div className="ml-auto flex items-center gap-2.5">
         <Link
           href="/txn/new/sale"
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-soft px-4 text-[13.5px] font-medium text-brand transition hover:brightness-97"
+          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand px-5 text-[13.5px] font-medium text-white shadow-[0_10px_22px_-12px_rgb(28_27_24/0.7)] transition hover:bg-brand-dark"
         >
           <Plus size={16} />
           Add Sale
@@ -57,7 +57,7 @@ export function Topbar() {
 
         <Link
           href="/txn/new/purchase"
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent-soft px-4 text-[13.5px] font-medium text-accent transition hover:brightness-97"
+          className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gold px-5 text-[13.5px] font-medium text-ink shadow-[0_10px_22px_-12px_rgb(200_150_20/0.7)] transition hover:brightness-97"
         >
           <Plus size={16} />
           Add Purchase
@@ -65,7 +65,7 @@ export function Topbar() {
 
         <Menu
           trigger={
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent transition hover:brightness-95">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/75 text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.9)] ring-1 ring-white/70 transition hover:bg-white">
               <Plus size={17} />
             </span>
           }
@@ -82,7 +82,7 @@ export function Topbar() {
 
         <Menu
           trigger={
-            <span className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft transition hover:bg-canvas">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full text-ink-soft transition hover:bg-white/80">
               <MoreVertical size={18} />
             </span>
           }
@@ -98,7 +98,7 @@ export function Topbar() {
           trigger={
             <span
               title={user?.email ?? undefined}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-white transition hover:brightness-95"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-white shadow-[0_8px_18px_-10px_rgb(28_27_24/0.7)] transition hover:brightness-125"
             >
               {initial}
             </span>

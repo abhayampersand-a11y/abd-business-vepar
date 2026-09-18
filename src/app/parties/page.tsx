@@ -37,6 +37,13 @@ import { useAppDispatch } from '@/store/hooks';
 import { pushToast } from '@/store/uiSlice';
 import type { Party, Transaction } from '@/types';
 
+/** Up to two initials for a party's avatar circle. */
+function initials(name: string) {
+  const parts = name.trim().split(/s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts[1]?.[0] ?? '')).toUpperCase();
+}
+
 export default function PartiesPage() {
   return (
     <Suspense fallback={<Spinner />}>
@@ -69,9 +76,17 @@ function PartiesScreen() {
       header: 'Party Name',
       filterable: true,
       render: (p) => (
-        <div>
-          <span className="font-medium text-ink">{p.name}</span>
-          {p.phone && <div className="text-[12px] text-ink-faint">{p.phone}</div>}
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-soft text-[11.5px] font-semibold uppercase text-ink-soft"
+          >
+            {initials(p.name)}
+          </span>
+          <div className="min-w-0">
+            <span className="block truncate font-medium text-ink">{p.name}</span>
+            {p.phone && <span className="block text-[12px] text-ink-faint">{p.phone}</span>}
+          </div>
         </div>
       ),
     },
@@ -179,7 +194,7 @@ function PartiesScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-line bg-white px-5 py-3">
+      <div className="flex items-center justify-between border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <h1 className="text-lg font-semibold text-ink">Parties</h1>
         <div className="flex items-center gap-2">
           <Button
@@ -220,7 +235,7 @@ function PartiesScreen() {
 
       <div className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* Party list */}
-        <div className="flex min-h-0 flex-col border-r border-line bg-white">
+        <div className="flex min-h-0 flex-col border-r border-white/60 bg-white/40">
           <div className="p-3">
             <SearchInput value={search} onChange={setSearch} placeholder="Search Party Name" />
           </div>
@@ -270,7 +285,7 @@ function PartiesScreen() {
         </div>
 
         {/* Party detail */}
-        <div className="flex min-h-0 flex-col overflow-y-auto bg-canvas">
+        <div className="flex min-h-0 flex-col overflow-y-auto">
           {!selected ? (
             <EmptyState
               icon={<Users size={30} />}

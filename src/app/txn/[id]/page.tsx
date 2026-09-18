@@ -93,7 +93,7 @@ function TransactionView({ id }: { id: number }) {
   return (
     <div className="min-h-full bg-canvas">
       {/* Toolbar */}
-      <div className="no-print flex flex-wrap items-center gap-2 border-b border-line bg-white px-5 py-3">
+      <div className="no-print flex flex-wrap items-center gap-2 border-b border-white/60 bg-white/45 backdrop-blur-sm px-5 py-3">
         <button
           onClick={() => router.back()}
           className="rounded-full p-1.5 text-ink-soft transition hover:bg-canvas"

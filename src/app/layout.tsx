@@ -5,7 +5,7 @@ import { Chrome } from '@/components/layout/Chrome';
 import { Toaster } from '@/components/ui/Toaster';
 
 export const metadata: Metadata = {
-  title: 'Vyapar — Business Accounting & Billing',
+  title: 'Dhandho — Business Accounting & Billing',
   description:
     'Invoicing, inventory, parties, expenses, GST reports and banking for small businesses.',
 };

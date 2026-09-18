@@ -8,7 +8,7 @@ export default function Page() {
     <FeaturePage
       icon={MessageCircle}
       title={"WhatsApp Connect"}
-      subtitle={"Send invoices, payment reminders and updates to your customers on WhatsApp without leaving Vyapar."}
+      subtitle={"Send invoices, payment reminders and updates to your customers on WhatsApp without leaving Dhandho."}
       features={[
         { title: "Share invoices instantly", body: "Send a PDF straight to the customer as soon as you save the bill." },
         { title: "Automatic payment reminders", body: "Nudge overdue parties on a schedule you decide." },
